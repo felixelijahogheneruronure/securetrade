@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AdminSidebar } from "@/components/dashboard/admin-sidebar";
 import { StatsCards } from "@/components/admin/stats-cards";
-import { RecentUsers } from "@/components/admin/recent-users";
+import { CurrentClients } from "@/components/admin/current-clients";
 import { TransactionOverview } from "@/components/admin/transaction-overview";
 import { UserManagement } from "@/components/admin/user-management";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,10 +25,10 @@ const AdminHome = () => {
       <div className="grid grid-cols-1 gap-6 mt-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Recent Users</CardTitle>
+            <CardTitle className="text-xl">Current Clients</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentUsers />
+            <CurrentClients />
           </CardContent>
         </Card>
         
