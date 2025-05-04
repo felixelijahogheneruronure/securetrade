@@ -1,6 +1,7 @@
 
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context";
+import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (requireAdmin && !user.isAdmin) {
     // If admin route but user is not admin
+    toast.error("You do not have permission to access this area");
     return <Navigate to="/dashboard" replace />;
   }
 

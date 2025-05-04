@@ -46,6 +46,22 @@ const DEFAULT_WALLETS = [
   { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 1000, value: 1000, change: 0 },
 ];
 
+// Admin account details
+const ADMIN_ACCOUNT = {
+  user_id: 'admin_001',
+  email: 'admin@admin.com',
+  username: 'Admin',
+  auth_provider: 'local',
+  password: 'admin',
+  account_status: 'active',
+  isAdmin: true,
+  wallets: [
+    { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 10.0, value: 608000, change: 1.8 },
+    { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 100.0, value: 206000, change: -0.5 },
+    { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 500000, value: 500000, change: 0 },
+  ]
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +79,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     }
     setIsLoading(false);
+
+    // Check if admin account exists, if not create it
+    ensureAdminAccount();
   }, []);
+
+  // Ensure admin account exists
+  const ensureAdminAccount = async () => {
+    try {
+      const users = await getUsers();
+      const adminExists = users.some(user => user.email === ADMIN_ACCOUNT.email);
+      
+      if (!adminExists) {
+        console.log("Creating admin account");
+        users.push(ADMIN_ACCOUNT);
+        await updateUsers(users);
+      }
+    } catch (error) {
+      console.error("Failed to check/create admin account:", error);
+    }
+  };
 
   async function getUsers() {
     try {
@@ -136,8 +171,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
 
       if (user) {
-        // Add isAdmin flag
-        const isAdmin = email.includes('admin');
+        // Determine if user is admin
+        const isAdmin = user.isAdmin || email === ADMIN_ACCOUNT.email;
         
         // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = user;
