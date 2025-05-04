@@ -10,6 +10,17 @@ type User = {
   username?: string;
   auth_provider: string;
   account_status: string;
+  wallets?: UserWallet[];
+  isAdmin?: boolean;
+};
+
+export type UserWallet = {
+  id: string;
+  name: string;
+  symbol: string;
+  balance: number;
+  value: number;
+  change: number;
 };
 
 type AuthContextType = {
@@ -18,6 +29,8 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUserWallets: (userId: string, wallets: UserWallet[]) => Promise<boolean>;
+  getUsers: () => Promise<User[]>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +38,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // JSONBin constants
 const BIN_ID = '681568f78a456b79669672dc';
 const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
+
+// Sample wallet data for new users
+const DEFAULT_WALLETS = [
+  { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
+  { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 2.0, value: 4120.75, change: -0.5 },
+  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 1000, value: 1000, change: 0 },
+];
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -78,6 +98,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
+  const updateUserWallets = async (userId: string, wallets: UserWallet[]): Promise<boolean> => {
+    try {
+      const users = await getUsers();
+      const userIndex = users.findIndex(u => u.user_id === userId);
+      
+      if (userIndex === -1) {
+        toast.error("User not found");
+        return false;
+      }
+      
+      users[userIndex].wallets = wallets;
+      const success = await updateUsers(users);
+      
+      // If the current user's wallets are being updated, update the local state too
+      if (success && user && user.user_id === userId) {
+        const updatedUser = { ...user, wallets };
+        setUser(updatedUser);
+        localStorage.setItem("blockbridge_user", JSON.stringify(updatedUser));
+        toast.success("Wallet updated successfully");
+      }
+      
+      return success;
+    } catch (error) {
+      console.error("Failed to update user wallets:", error);
+      toast.error("Failed to update wallet");
+      return false;
+    }
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -87,15 +136,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
 
       if (user) {
+        // Add isAdmin flag
+        const isAdmin = email.includes('admin');
+        
         // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = user;
-        setUser(userWithoutPassword as User);
-        localStorage.setItem("blockbridge_user", JSON.stringify(userWithoutPassword));
+        
+        // Make sure the user has wallets
+        const userWithWallets = {
+          ...userWithoutPassword,
+          wallets: user.wallets || DEFAULT_WALLETS,
+          isAdmin
+        } as User;
+        
+        setUser(userWithWallets);
+        localStorage.setItem("blockbridge_user", JSON.stringify(userWithWallets));
         
         toast.success(`Welcome back, ${user.username || user.email}!`);
         
         // Determine where to redirect based on user type
-        if (email.includes('admin')) {
+        if (isAdmin) {
           navigate("/admin");
         } else {
           navigate("/dashboard");
@@ -124,13 +184,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
 
+      // Create new user with default wallets
       const newUser = {
         user_id: 'local_' + Math.floor(Math.random() * 999999),
         email,
         username,
         auth_provider: 'local',
         password,
-        account_status: 'active'
+        account_status: 'active',
+        wallets: DEFAULT_WALLETS,
+        isAdmin: email.includes('admin')
       };
 
       users.push(newUser);
@@ -142,7 +205,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast.success("Registration successful! Logging you in...");
         setUser(userWithoutPassword as User);
         localStorage.setItem("blockbridge_user", JSON.stringify(userWithoutPassword));
-        navigate("/dashboard");
+        
+        if (userWithoutPassword.isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
         return true;
       } else {
         toast.error("Registration failed. Please try again.");
@@ -165,7 +233,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoading, 
+      login, 
+      register, 
+      logout,
+      updateUserWallets,
+      getUsers
+    }}>
       {children}
     </AuthContext.Provider>
   );

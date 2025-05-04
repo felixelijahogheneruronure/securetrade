@@ -27,7 +27,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && !user.email.includes('admin')) {
+  if (requireAdmin && !user.isAdmin) {
     // If admin route but user is not admin
     return <Navigate to="/dashboard" replace />;
   }

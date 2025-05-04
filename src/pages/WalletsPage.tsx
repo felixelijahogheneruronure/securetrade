@@ -3,15 +3,29 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-
-// Sample wallet data - in a real app, this would come from an API
-const wallets = [
-  { id: 1, name: 'Bitcoin', symbol: 'BTC', balance: 0.45, value: 27345.12, change: 2.4 },
-  { id: 2, name: 'Ethereum', symbol: 'ETH', balance: 3.25, value: 6721.33, change: -1.2 },
-  { id: 3, name: 'USD Coin', symbol: 'USDC', balance: 1250, value: 1250, change: 0 },
-];
+import { useAuth } from "@/contexts/auth-context";
+import { toast } from "sonner";
 
 const WalletsPage = () => {
+  const { user } = useAuth();
+  const wallets = user?.wallets || [];
+
+  const handleAddWallet = () => {
+    toast.info("This feature is coming soon!");
+  };
+
+  const handleDeposit = () => {
+    toast.info("Deposit functionality will be available soon!");
+  };
+
+  const handleWithdraw = () => {
+    toast.info("Withdrawal functionality will be available soon!");
+  };
+
+  const handleConnectWallet = () => {
+    toast.info("External wallet connections will be available soon!");
+  };
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -39,11 +53,11 @@ const WalletsPage = () => {
             <CardDescription>Quick Actions</CardDescription>
           </CardHeader>
           <CardContent className="flex gap-2 flex-1 justify-center items-center">
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleDeposit}>
               <ArrowDownLeft className="mr-2 h-4 w-4" />
               Deposit
             </Button>
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleWithdraw}>
               <ArrowUpRight className="mr-2 h-4 w-4" />
               Withdraw
             </Button>
@@ -56,7 +70,7 @@ const WalletsPage = () => {
             <CardTitle className="text-3xl font-bold">{wallets.length}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="sm" className="w-full" onClick={handleAddWallet}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add New Wallet
             </Button>
@@ -67,43 +81,51 @@ const WalletsPage = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold">Your Wallets</h3>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleConnectWallet}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Connect External Wallet
           </Button>
         </div>
         
-        {wallets.map((wallet) => (
-          <Card key={wallet.id} className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="bg-primary/10 p-2 rounded-full mr-4">
-                    <Wallet className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{wallet.name}</h4>
-                    <p className="text-sm text-muted-foreground">{wallet.symbol}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium">{wallet.balance} {wallet.symbol}</div>
-                  <div className="flex items-center justify-end">
-                    <span className="font-medium">
-                      ${wallet.value.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </span>
-                    <span className={`ml-2 text-xs ${wallet.change > 0 ? 'text-green-500' : wallet.change < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                      {wallet.change > 0 ? '+' : ''}{wallet.change}%
-                    </span>
-                  </div>
-                </div>
-              </div>
+        {wallets.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p>No wallets found. Add a wallet to get started.</p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          wallets.map((wallet) => (
+            <Card key={wallet.id} className="hover:border-primary/50 transition-colors cursor-pointer">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="bg-primary/10 p-2 rounded-full mr-4">
+                      <Wallet className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{wallet.name}</h4>
+                      <p className="text-sm text-muted-foreground">{wallet.symbol}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">{wallet.balance} {wallet.symbol}</div>
+                    <div className="flex items-center justify-end">
+                      <span className="font-medium">
+                        ${wallet.value.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                      <span className={`ml-2 text-xs ${wallet.change > 0 ? 'text-green-500' : wallet.change < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                        {wallet.change > 0 ? '+' : ''}{wallet.change}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
