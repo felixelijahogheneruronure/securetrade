@@ -7,9 +7,12 @@ import {
   Home, 
   Settings, 
   Users, 
-  Wallet 
+  Wallet,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
 
 const userNavItems = [
   {
@@ -41,6 +44,7 @@ const userNavItems = [
 
 export function UserSidebar() {
   const location = useLocation();
+  const { logout } = useAuth();
   
   return (
     <div className="h-full w-64 border-r border-border bg-card">
@@ -73,6 +77,17 @@ export function UserSidebar() {
             </Link>
           ))}
         </div>
+      </div>
+      
+      <div className="absolute bottom-4 left-0 right-0 px-3">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-foreground/70 hover:bg-destructive/10 hover:text-destructive"
+          onClick={logout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </div>
     </div>
   );

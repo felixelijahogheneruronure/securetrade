@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/contexts/auth-context";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -44,22 +46,38 @@ export function Navbar() {
           >
             About
           </Link>
-          <Link
-            to="/dashboard"
-            className="text-foreground/80 transition-colors hover:text-foreground"
-          >
-            Dashboard
-          </Link>
+          {user && (
+            <Link
+              to="/dashboard"
+              className="text-foreground/80 transition-colors hover:text-foreground"
+            >
+              Dashboard
+            </Link>
+          )}
         </div>
 
         <div className="hidden md:flex items-center space-x-2">
           <ThemeToggle />
-          <Button asChild variant="outline" size="sm">
-            <Link to="/login">Login</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link to="/register">Register</Link>
-          </Button>
+          
+          {user ? (
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={logout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link to="/register">Register</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -101,24 +119,44 @@ export function Navbar() {
             >
               About
             </Link>
-            <Link
-              to="/dashboard"
-              className="rounded-md p-2 text-lg font-medium hover:bg-accent/10"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
+            {user && (
+              <Link
+                to="/dashboard"
+                className="rounded-md p-2 text-lg font-medium hover:bg-accent/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
             <div className="flex flex-col space-y-2 pt-4">
-              <Button asChild variant="outline" size="lg">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  Login
-                </Link>
-              </Button>
-              <Button asChild size="lg">
-                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  Register
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button asChild variant="outline" size="lg">
+                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="lg" onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant="outline" size="lg">
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      Login
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg">
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                      Register
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

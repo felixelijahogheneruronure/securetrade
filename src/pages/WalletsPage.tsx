@@ -1,0 +1,112 @@
+
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+
+// Sample wallet data - in a real app, this would come from an API
+const wallets = [
+  { id: 1, name: 'Bitcoin', symbol: 'BTC', balance: 0.45, value: 27345.12, change: 2.4 },
+  { id: 2, name: 'Ethereum', symbol: 'ETH', balance: 3.25, value: 6721.33, change: -1.2 },
+  { id: 3, name: 'USD Coin', symbol: 'USDC', balance: 1250, value: 1250, change: 0 },
+];
+
+const WalletsPage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold tracking-tight">Wallets</h2>
+        <p className="text-muted-foreground">
+          Manage your crypto assets and transactions
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Total Balance (USD)</CardDescription>
+            <CardTitle className="text-3xl font-bold">
+              ${wallets.reduce((acc, wallet) => acc + wallet.value, 0).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        
+        <Card className="flex flex-col">
+          <CardHeader className="pb-2">
+            <CardDescription>Quick Actions</CardDescription>
+          </CardHeader>
+          <CardContent className="flex gap-2 flex-1 justify-center items-center">
+            <Button variant="outline" size="sm" className="flex-1">
+              <ArrowDownLeft className="mr-2 h-4 w-4" />
+              Deposit
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1">
+              <ArrowUpRight className="mr-2 h-4 w-4" />
+              Withdraw
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Wallets</CardDescription>
+            <CardTitle className="text-3xl font-bold">{wallets.length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" size="sm" className="w-full">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add New Wallet
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold">Your Wallets</h3>
+          <Button variant="outline" size="sm">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Connect External Wallet
+          </Button>
+        </div>
+        
+        {wallets.map((wallet) => (
+          <Card key={wallet.id} className="hover:border-primary/50 transition-colors cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="bg-primary/10 p-2 rounded-full mr-4">
+                    <Wallet className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{wallet.name}</h4>
+                    <p className="text-sm text-muted-foreground">{wallet.symbol}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">{wallet.balance} {wallet.symbol}</div>
+                  <div className="flex items-center justify-end">
+                    <span className="font-medium">
+                      ${wallet.value.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                    <span className={`ml-2 text-xs ${wallet.change > 0 ? 'text-green-500' : wallet.change < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                      {wallet.change > 0 ? '+' : ''}{wallet.change}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default WalletsPage;
