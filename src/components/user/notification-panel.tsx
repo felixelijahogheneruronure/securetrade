@@ -14,9 +14,10 @@ import { NotificationItem, Notification } from "@/components/notifications/notif
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 
-// New JSONBin constants for notifications
-const NOTIFICATIONS_BIN_ID = '681569db8a456b7966967337';
+// Updated JSONBin constants for notifications
+const NOTIFICATIONS_BIN_URL = 'https://api.jsonbin.io/v3/b/681886c68960c979a593b1c6';
 const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
+const ACCESS_KEY = '$2a$10$ZBvH0BxKCETxq1zcx60ufuO/YIMH63mLSnUcAIxa5sp1DZ72ZDnNS';
 
 export function NotificationPanel() {
   const { user } = useAuth();
@@ -32,9 +33,10 @@ export function NotificationPanel() {
     
     setLoading(true);
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+      const res = await fetch(`${NOTIFICATIONS_BIN_URL}/latest`, {
         headers: {
-          'X-Master-Key': MASTER_KEY
+          'X-Master-Key': MASTER_KEY,
+          'X-Access-Key': ACCESS_KEY
         }
       });
       
@@ -81,9 +83,10 @@ export function NotificationPanel() {
   const updateNotifications = async (updatedNotification: Notification) => {
     try {
       // First get all notifications
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+      const res = await fetch(`${NOTIFICATIONS_BIN_URL}/latest`, {
         headers: {
-          'X-Master-Key': MASTER_KEY
+          'X-Master-Key': MASTER_KEY,
+          'X-Access-Key': ACCESS_KEY
         }
       });
       
@@ -101,11 +104,12 @@ export function NotificationPanel() {
       );
       
       // Save back to JSONBin
-      const updateRes = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}`, {
+      const updateRes = await fetch(`${NOTIFICATIONS_BIN_URL}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': MASTER_KEY
+          'X-Master-Key': MASTER_KEY,
+          'X-Access-Key': ACCESS_KEY
         },
         body: JSON.stringify({ 
           ...data.record,

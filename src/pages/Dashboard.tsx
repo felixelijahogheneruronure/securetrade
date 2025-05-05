@@ -6,6 +6,7 @@ import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
 import { UserSidebar } from "@/components/dashboard/user-sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import WalletsPage from "./WalletsPage";
+import { NotificationPanel } from "@/components/user/notification-panel";
 
 const DashboardHome = () => (
   <div className="p-6">
@@ -40,6 +41,7 @@ const Dashboard = () => {
         <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="flex h-14 items-center px-4">
             <div className="ml-auto flex items-center space-x-4">
+              <NotificationPanel />
               <div className="flex items-center">
                 <span className="mr-2 text-sm font-medium">
                   {user?.username || user?.email}

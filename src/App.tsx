@@ -15,6 +15,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import JsonBinDashboard from "./pages/JsonBinDashboard";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,10 @@ const App = () => (
                     <Admin />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/jsonbin" 
+                element={<JsonBinDashboard />} 
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
