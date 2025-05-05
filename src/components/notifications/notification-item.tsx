@@ -1,0 +1,79 @@
+
+import { Bell } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  type: "general" | "personal";
+  recipientId?: string; // For personal notifications
+}
+
+interface NotificationItemProps {
+  notification: Notification;
+  onMarkAsRead?: (id: string) => void;
+}
+
+export function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
+  const handleMarkAsRead = () => {
+    if (!notification.isRead && onMarkAsRead) {
+      onMarkAsRead(notification.id);
+    }
+  };
+
+  return (
+    <div 
+      className={cn(
+        "p-4 border-b last:border-b-0 cursor-pointer transition-colors",
+        notification.isRead 
+          ? "bg-background" 
+          : "bg-muted/30 hover:bg-muted/50"
+      )}
+      onClick={handleMarkAsRead}
+    >
+      <div className="flex items-start gap-3">
+        <div className={cn(
+          "mt-0.5 rounded-full p-1.5",
+          notification.type === "general" 
+            ? "bg-blue-100 text-blue-600" 
+            : "bg-purple-100 text-purple-600"
+        )}>
+          <Bell className="h-3 w-3" />
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <h4 className={cn(
+              "text-sm font-medium",
+              !notification.isRead && "font-semibold"
+            )}>
+              {notification.title}
+            </h4>
+            <span className="text-xs text-muted-foreground">
+              {new Date(notification.timestamp).toLocaleDateString()}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {notification.message}
+          </p>
+          <div className="flex justify-between items-center mt-2">
+            <span className={cn(
+              "text-xs py-0.5 px-2 rounded-full",
+              notification.type === "general" 
+                ? "bg-blue-100 text-blue-600" 
+                : "bg-purple-100 text-purple-600"
+            )}>
+              {notification.type === "general" ? "Announcement" : "Personal"}
+            </span>
+            {!notification.isRead && (
+              <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

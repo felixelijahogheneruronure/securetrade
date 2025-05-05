@@ -1,7 +1,9 @@
 
-import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -10,163 +12,197 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/auth-context";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, User } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
-const Login = () => {
+export default function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Get the page they were trying to access before being redirected to login
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("user");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    
-    if (!email || !password) {
-      return;
-    }
+    setIsLoading(true);
 
-    setIsSubmitting(true);
-    
     try {
-      const success = await login(email, password);
+      const currentEmail = activeTab === "user" ? email : adminEmail;
+      const currentPassword = activeTab === "user" ? password : adminPassword;
+
+      const success = await login(currentEmail, currentPassword);
       
       if (success) {
-        // Redirect will be handled in the login function
+        toast({
+          title: "Login successful",
+          description: "You have been logged in successfully.",
+        });
+        
+        if (activeTab === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+        });
       }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "An error occurred during login. Please try again.",
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
-  };
-
-  const handleAdminLogin = () => {
-    setEmail("admin@admin.com");
-    setPassword("admin");
-  };
-
-  const handleUserLogin = () => {
-    setEmail("");
-    setPassword("");
-  };
+  }
 
   return (
-    <div className="container flex items-center justify-center py-16 md:py-24">
-      <div className="w-full max-w-md">
-        <Card className="border-border/50 shadow-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>
-              Login to your BlockBridge account
-            </CardDescription>
-          </CardHeader>
-          
-          <Tabs defaultValue="user" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="user" onClick={handleUserLogin}>
-                <User className="mr-2 h-4 w-4" />
-                User Login
-              </TabsTrigger>
-              <TabsTrigger value="admin" onClick={handleAdminLogin}>
-                <Users className="mr-2 h-4 w-4" />
-                Admin Login
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="user">
-              <CardContent className="pt-4">
-                <form onSubmit={handleSubmit}>
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="name@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} 
-                        required
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="password">Password</Label>
-                        <Link
-                          to="/forgot-password"
-                          className="text-sm text-primary hover:underline"
-                        >
-                          Forgot password?
-                        </Link>
-                      </div>
-                      <Input 
-                        id="password" 
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required 
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Signing In..." : "Sign In"}
-                    </Button>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+      <Card className="mx-auto w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-xl">Login</CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="user">User</TabsTrigger>
+            <TabsTrigger value="admin">Admin</TabsTrigger>
+          </TabsList>
+          <TabsContent value="user">
+            <form onSubmit={handleLogin}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    placeholder="name@example.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Password
+                    </label>
                   </div>
-                </form>
+                  <Input
+                    id="password"
+                    placeholder="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
               </CardContent>
-            </TabsContent>
-            
-            <TabsContent value="admin">
-              <CardContent className="pt-4">
-                <form onSubmit={handleSubmit}>
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="admin-email">Admin Email</Label>
-                      <Input 
-                        id="admin-email" 
-                        type="email" 
-                        placeholder="admin@admin.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} 
-                        required
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="admin-password">Admin Password</Label>
-                      <Input 
-                        id="admin-password" 
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required 
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Signing In..." : "Admin Sign In"}
-                    </Button>
+              <CardFooter className="flex flex-col space-y-4">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in..." : "Login"}
+                </Button>
+                <div className="text-center text-sm">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="font-medium text-primary underline"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
+          </TabsContent>
+          <TabsContent value="admin">
+            <form onSubmit={handleLogin}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="admin-email"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Admin Email
+                  </label>
+                  <Input
+                    id="admin-email"
+                    placeholder="admin@example.com"
+                    type="email"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="admin-password"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Admin Password
+                    </label>
                   </div>
-                </form>
+                  <Input
+                    id="admin-password"
+                    placeholder="Password"
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
+                <div className="rounded-md bg-muted p-3 text-sm">
+                  <div className="flex items-center">
+                    <div className="mr-2 h-2 w-2 rounded-full bg-blue-500"></div>
+                    <p>Default admin login: admin@admin.com / admin</p>
+                  </div>
+                </div>
               </CardContent>
-            </TabsContent>
-          </Tabs>
-          
-          <CardFooter className="flex justify-center">
-            <div className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
-                Register
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
+              <CardFooter>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in..." : "Login as Admin"}
+                </Button>
+              </CardFooter>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </Card>
     </div>
   );
-};
-
-export default Login;
+}
