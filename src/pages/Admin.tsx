@@ -15,6 +15,7 @@ import { Bell, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
+import TradingRoom from "./TradingRoom";
 
 // Admin dashboard home component
 const AdminHome = () => {
@@ -148,6 +149,7 @@ const Admin = () => {
           <Route path="/" element={<AdminHome />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/trading" element={<TradingRoom />} />
           {/* Add more routes as needed */}
         </Routes>
         <Toaster />

@@ -6,6 +6,7 @@ import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
 import { UserSidebar } from "@/components/dashboard/user-sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import WalletsPage from "./WalletsPage";
+import TradingRoom from "./TradingRoom";
 import { NotificationPanel } from "@/components/user/notification-panel";
 
 const DashboardHome = () => (
@@ -59,6 +60,7 @@ const Dashboard = () => {
         <Routes>
           <Route path="/" element={<DashboardHome />} />
           <Route path="/wallets" element={<WalletsPage />} />
+          <Route path="/trading" element={<TradingRoom />} />
           {/* Add more routes as needed */}
         </Routes>
       </div>

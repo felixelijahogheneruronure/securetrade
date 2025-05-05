@@ -31,6 +31,11 @@ const userNavItems = [
     icon: Clock,
   },
   {
+    title: "Trading Room",
+    href: "/dashboard/trading",
+    icon: BarChart,
+  },
+  {
     title: "Trade",
     href: "/dashboard/trade",
     icon: CreditCard,

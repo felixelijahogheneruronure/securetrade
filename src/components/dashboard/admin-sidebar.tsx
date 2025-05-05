@@ -49,6 +49,11 @@ const adminNavItems = [
     icon: Wallet,
   },
   {
+    title: "Trading Room",
+    href: "/admin/trading",
+    icon: BarChart,
+  },
+  {
     title: "Analytics",
     href: "/admin/analytics",
     icon: BarChart,
