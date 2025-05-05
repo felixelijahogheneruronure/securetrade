@@ -1,5 +1,5 @@
 
-import { Bell } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Notification {
@@ -8,7 +8,7 @@ export interface Notification {
   message: string;
   timestamp: string;
   isRead: boolean;
-  type: "general" | "personal";
+  type: "general" | "personal" | "system";
   recipientId?: string; // For personal notifications
 }
 
@@ -39,7 +39,9 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
           "mt-0.5 rounded-full p-1.5",
           notification.type === "general" 
             ? "bg-blue-100 text-blue-600" 
-            : "bg-purple-100 text-purple-600"
+            : notification.type === "personal"
+              ? "bg-purple-100 text-purple-600"
+              : "bg-green-100 text-green-600"
         )}>
           <Bell className="h-3 w-3" />
         </div>
@@ -64,9 +66,15 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
               "text-xs py-0.5 px-2 rounded-full",
               notification.type === "general" 
                 ? "bg-blue-100 text-blue-600" 
-                : "bg-purple-100 text-purple-600"
+                : notification.type === "personal"
+                  ? "bg-purple-100 text-purple-600"
+                  : "bg-green-100 text-green-600"
             )}>
-              {notification.type === "general" ? "Announcement" : "Personal"}
+              {notification.type === "general" 
+                ? "Announcement" 
+                : notification.type === "personal"
+                  ? "Personal"
+                  : "System"}
             </span>
             {!notification.isRead && (
               <span className="w-2 h-2 rounded-full bg-blue-600"></span>

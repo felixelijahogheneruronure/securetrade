@@ -14,6 +14,10 @@ import { NotificationItem, Notification } from "@/components/notifications/notif
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 
+// New JSONBin constants for notifications
+const NOTIFICATIONS_BIN_ID = '681569db8a456b7966967337';
+const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
+
 export function NotificationPanel() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -21,66 +25,105 @@ export function NotificationPanel() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Simulate fetching notifications
-  useEffect(() => {
+  // Fetch notifications from the new JSONBin
+  const fetchNotifications = async () => {
     if (user) {
-      // This would normally come from an API
-      const mockNotifications: Notification[] = [
-        {
-          id: "1",
-          title: "Welcome to our platform",
-          message: "Thank you for joining our platform. We're excited to have you here!",
-          timestamp: new Date().toISOString(),
-          isRead: false,
-          type: "general"
-        },
-        {
-          id: "2",
-          title: "Your account has been verified",
-          message: "Congratulations! Your account has been successfully verified.",
-          timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          isRead: true,
-          type: "personal",
-          recipientId: user.user_id
-        },
-        {
-          id: "3",
-          title: "New feature available",
-          message: "Check out our new crypto wallet feature that's now available!",
-          timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          isRead: false,
-          type: "general"
-        },
-        {
-          id: "4",
-          title: "Security alert",
-          message: "We've detected a new login to your account. If this wasn't you, please contact support.",
-          timestamp: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-          isRead: false,
-          type: "personal",
-          recipientId: user.user_id
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+          headers: {
+            'X-Master-Key': MASTER_KEY
+          }
+        });
+        const data = await res.json();
+        
+        if (data.record && data.record.notifications) {
+          // Filter notifications for this user (general + personal for this user)
+          const userNotifications = data.record.notifications.filter((notif: Notification) => 
+            notif.type === "general" || 
+            (notif.type === "personal" && notif.recipientId === user.user_id) ||
+            (notif.type === "system")
+          );
+          
+          setNotifications(userNotifications);
+          
+          // Calculate unread count
+          const unread = userNotifications.filter((n: Notification) => !n.isRead).length;
+          setUnreadCount(unread);
+        } else {
+          // Initialize if no notifications exist
+          updateNotifications([]);
         }
-      ];
-      
-      setNotifications(mockNotifications);
-      
-      // Calculate unread count
-      const unread = mockNotifications.filter(n => !n.isRead).length;
-      setUnreadCount(unread);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load notifications",
+          variant: "destructive"
+        });
+      }
     }
+  };
+
+  // Update notifications in the JSONBin
+  const updateNotifications = async (updatedNotifications: Notification[]) => {
+    try {
+      // First get all notifications
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      
+      const allNotifications = data.record?.notifications || [];
+      
+      // Update specific notifications that belong to this user
+      const otherNotifications = allNotifications.filter((notif: Notification) => 
+        (notif.type === "personal" && notif.recipientId !== user?.user_id)
+      );
+      
+      // Combine with updated user notifications
+      const newNotifications = [...otherNotifications, ...updatedNotifications];
+      
+      // Save back to JSONBin
+      await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify({ notifications: newNotifications })
+      });
+      
+    } catch (error) {
+      console.error("Failed to update notifications:", error);
+    }
+  };
+
+  // Fetch notifications on mount and when user changes
+  useEffect(() => {
+    fetchNotifications();
+    
+    // Set up periodic refresh
+    const interval = setInterval(fetchNotifications, 60000); // Refresh every minute
+    
+    return () => clearInterval(interval);
   }, [user]);
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true } 
-          : notification
-      )
+  const handleMarkAsRead = async (id: string) => {
+    const updatedNotifications = notifications.map(notification => 
+      notification.id === id 
+        ? { ...notification, isRead: true } 
+        : notification
     );
     
+    setNotifications(updatedNotifications);
+    
+    // Update in JSONBin
+    await updateNotifications(updatedNotifications);
+    
     // Recalculate unread count
-    const updatedUnreadCount = notifications.filter(n => !n.isRead && n.id !== id).length;
+    const updatedUnreadCount = updatedNotifications.filter(n => !n.isRead).length;
     setUnreadCount(updatedUnreadCount);
     
     toast({
@@ -90,8 +133,9 @@ export function NotificationPanel() {
     });
   };
 
-  const personalNotifications = notifications.filter(n => n.type === "personal" && n.recipientId === user?.user_id);
+  const personalNotifications = notifications.filter(n => n.type === "personal");
   const generalNotifications = notifications.filter(n => n.type === "general");
+  const systemNotifications = notifications.filter(n => n.type === "system");
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

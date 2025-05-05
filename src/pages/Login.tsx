@@ -183,12 +183,6 @@ export default function Login() {
                     autoComplete="current-password"
                   />
                 </div>
-                <div className="rounded-md bg-muted p-3 text-sm">
-                  <div className="flex items-center">
-                    <div className="mr-2 h-2 w-2 rounded-full bg-blue-500"></div>
-                    <p>Default admin login: admin@admin.com / admin</p>
-                  </div>
-                </div>
               </CardContent>
               <CardFooter>
                 <Button

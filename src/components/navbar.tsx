@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/auth-context";
+import { NotificationPanel } from "@/components/user/notification-panel";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,7 +49,7 @@ export function Navbar() {
           </Link>
           {user && (
             <Link
-              to="/dashboard"
+              to={user.isAdmin ? "/admin" : "/dashboard"}
               className="text-foreground/80 transition-colors hover:text-foreground"
             >
               Dashboard
@@ -59,10 +60,12 @@ export function Navbar() {
         <div className="hidden md:flex items-center space-x-2">
           <ThemeToggle />
           
+          {user && <NotificationPanel />}
+          
           {user ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link to="/dashboard">Dashboard</Link>
+                <Link to={user.isAdmin ? "/admin" : "/dashboard"}>Dashboard</Link>
               </Button>
               <Button variant="ghost" size="sm" onClick={logout}>
                 Logout
@@ -83,6 +86,7 @@ export function Navbar() {
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
           <ThemeToggle />
+          {user && <NotificationPanel />}
           <Button
             variant="ghost"
             size="icon"
@@ -121,7 +125,7 @@ export function Navbar() {
             </Link>
             {user && (
               <Link
-                to="/dashboard"
+                to={user.isAdmin ? "/admin" : "/dashboard"}
                 className="rounded-md p-2 text-lg font-medium hover:bg-accent/10"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -132,7 +136,7 @@ export function Navbar() {
               {user ? (
                 <>
                   <Button asChild variant="outline" size="lg">
-                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <Link to={user.isAdmin ? "/admin" : "/dashboard"} onClick={() => setMobileMenuOpen(false)}>
                       Dashboard
                     </Link>
                   </Button>

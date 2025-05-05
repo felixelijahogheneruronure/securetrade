@@ -11,9 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { NotificationPanel } from "@/components/user/notification-panel";
 import { Toaster } from "@/components/ui/toaster";
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 // Admin dashboard home component
 const AdminHome = () => {
@@ -84,12 +85,21 @@ const NotificationsPage = () => {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
+  };
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out"
+    });
   };
   
   return (
@@ -121,6 +131,15 @@ const Admin = () => {
                   </div>
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="text-red-500 hover:text-red-600 hover:bg-red-100/20"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </div>

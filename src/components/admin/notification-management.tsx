@@ -6,7 +6,8 @@ import {
   Plus, 
   Trash2, 
   Users, 
-  User
+  User,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +42,18 @@ import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Notification } from "@/components/notifications/notification-item";
 
+// New JSONBin constants for notifications
+const NOTIFICATIONS_BIN_ID = '681569db8a456b7966967337';
+const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
+
+// Interface for KYC status
+interface KycStatus {
+  userId: string;
+  status: "pending" | "verified" | "rejected";
+  submissionDate: string;
+  verificationDate?: string;
+}
+
 export function NotificationManagement() {
   const { getUsers } = useAuth();
   const { toast } = useToast();
@@ -52,10 +65,12 @@ export function NotificationManagement() {
   const [message, setMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [kycStatuses, setKycStatuses] = useState<KycStatus[]>([]);
 
   useEffect(() => {
     fetchUsers();
     fetchNotifications();
+    fetchKycStatuses();
   }, []);
 
   async function fetchUsers() {
@@ -71,40 +86,60 @@ export function NotificationManagement() {
 
   async function fetchNotifications() {
     setIsLoading(true);
-    // This would normally come from an API
-    const mockNotifications: Notification[] = [
-      {
-        id: "1",
-        title: "Welcome to our platform",
-        message: "Thank you for joining our platform. We're excited to have you here!",
-        timestamp: new Date().toISOString(),
-        isRead: false,
-        type: "general"
-      },
-      {
-        id: "2",
-        title: "Your account has been verified",
-        message: "Congratulations! Your account has been successfully verified.",
-        timestamp: new Date(Date.now() - 86400000).toISOString(),
-        isRead: true,
-        type: "personal",
-        recipientId: "user123"
-      },
-      {
-        id: "3",
-        title: "New feature available",
-        message: "Check out our new crypto wallet feature that's now available!",
-        timestamp: new Date(Date.now() - 172800000).toISOString(),
-        isRead: false,
-        type: "general"
+    try {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      
+      if (data.record && data.record.notifications) {
+        setNotifications(data.record.notifications);
+      } else {
+        // Initialize if doesn't exist
+        await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': MASTER_KEY
+          },
+          body: JSON.stringify({ notifications: [], kycStatuses: [] })
+        });
+        setNotifications([]);
       }
-    ];
-    
-    setNotifications(mockNotifications);
-    setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch notifications",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  const handleCreateNotification = () => {
+  async function fetchKycStatuses() {
+    try {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      
+      if (data.record && data.record.kycStatuses) {
+        setKycStatuses(data.record.kycStatuses);
+      } else {
+        setKycStatuses([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch KYC statuses:", error);
+    }
+  }
+
+  const handleCreateNotification = async () => {
     if (!title || !message) {
       toast({
         title: "Missing fields",
@@ -133,29 +168,97 @@ export function NotificationManagement() {
       ...(notificationType === "personal" && { recipientId: selectedUser })
     };
 
-    setNotifications(prev => [newNotification, ...prev]);
+    const updatedNotifications = [newNotification, ...notifications];
     
-    // Reset form
-    setTitle("");
-    setMessage("");
-    setSelectedUser("");
-    setIsDialogOpen(false);
-    
-    toast({
-      title: "Notification created",
-      description: `The ${notificationType} notification has been created successfully.`,
-      duration: 3000
-    });
+    try {
+      // Fetch latest first (someone else might have updated)
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      
+      const currentData = data.record || {};
+      
+      // Update JSONBin
+      await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify({
+          ...currentData,
+          notifications: updatedNotifications
+        })
+      });
+      
+      setNotifications(updatedNotifications);
+      
+      // Reset form
+      setTitle("");
+      setMessage("");
+      setSelectedUser("");
+      setIsDialogOpen(false);
+      
+      toast({
+        title: "Notification created",
+        description: `The ${notificationType} notification has been created successfully.`,
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Failed to save notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save notification",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDeleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  const handleDeleteNotification = async (id: string) => {
+    const filteredNotifications = notifications.filter(notification => notification.id !== id);
     
-    toast({
-      title: "Notification deleted",
-      description: "The notification has been deleted successfully.",
-      duration: 3000
-    });
+    try {
+      // Fetch latest first (someone else might have updated)
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      
+      const currentData = data.record || {};
+      
+      // Update JSONBin
+      await fetch(`https://api.jsonbin.io/v3/b/${NOTIFICATIONS_BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify({
+          ...currentData,
+          notifications: filteredNotifications
+        })
+      });
+      
+      setNotifications(filteredNotifications);
+      
+      toast({
+        title: "Notification deleted",
+        description: "The notification has been deleted successfully.",
+        duration: 3000
+      });
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete notification",
+        variant: "destructive"
+      });
+    }
   };
 
   const generalNotifications = notifications.filter(n => n.type === "general");
@@ -174,7 +277,17 @@ export function NotificationManagement() {
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-2xl font-bold">Notification Management</h2>
         <div className="flex items-center gap-2">
-          <Button onClick={fetchNotifications} variant="outline" size="sm">Refresh</Button>
+          <Button 
+            onClick={() => {
+              fetchNotifications();
+              fetchKycStatuses();
+            }} 
+            variant="outline" 
+            size="sm"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button>
