@@ -1,5 +1,5 @@
 
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, MessageSquare, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Notification {
@@ -24,6 +24,20 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
     }
   };
 
+  // Function to get the appropriate icon based on notification type
+  const getNotificationIcon = () => {
+    switch(notification.type) {
+      case "general":
+        return <Bell className="h-3 w-3" />;
+      case "personal":
+        return <MessageSquare className="h-3 w-3" />;
+      case "system":
+        return <AlertCircle className="h-3 w-3" />;
+      default:
+        return <Bell className="h-3 w-3" />;
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -43,7 +57,7 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
               ? "bg-purple-100 text-purple-600"
               : "bg-green-100 text-green-600"
         )}>
-          <Bell className="h-3 w-3" />
+          {getNotificationIcon()}
         </div>
         
         <div className="flex-1">
