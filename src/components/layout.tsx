@@ -5,8 +5,13 @@ import { Footer } from "@/components/footer";
 import { CryptoTicker } from "@/components/crypto-ticker";
 
 export function Layout() {
+  // Force dark mode for the black & gold theme
+  React.useLayoutEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-black text-white">
       <Navbar />
       <CryptoTicker />
       <main className="flex-grow">
@@ -16,3 +21,5 @@ export function Layout() {
     </div>
   );
 }
+
+import React from "react";
