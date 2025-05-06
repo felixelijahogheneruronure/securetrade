@@ -9,7 +9,10 @@ import {
   Settings, 
   Shield, 
   Users, 
-  Wallet 
+  Wallet,
+  ArrowDown,
+  ArrowUp,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +42,16 @@ const adminNavItems = [
     icon: FileCheck,
   },
   {
+    title: "Funding Requests",
+    href: "/admin/funding",
+    icon: ArrowDown,
+  },
+  {
+    title: "Withdrawal Requests",
+    href: "/admin/withdrawals",
+    icon: ArrowUp,
+  },
+  {
     title: "Transactions",
     href: "/admin/transactions",
     icon: Clock,
@@ -52,6 +65,11 @@ const adminNavItems = [
     title: "Trading Room",
     href: "/admin/trading",
     icon: BarChart,
+  },
+  {
+    title: "Messages",
+    href: "/admin/messages",
+    icon: Bell,
   },
   {
     title: "Analytics",
@@ -82,10 +100,10 @@ export function AdminSidebar({ isCollapsed = false }: AdminSidebarProps) {
         <Link to="/admin" className="flex items-center">
           <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-crypto-violet to-crypto-blue">
             <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-              B
+              U
             </div>
           </div>
-          {!isCollapsed && <span className="ml-2 text-xl font-bold">Admin</span>}
+          {!isCollapsed && <span className="ml-2 text-xl font-bold">Universal</span>}
         </Link>
       </div>
       
