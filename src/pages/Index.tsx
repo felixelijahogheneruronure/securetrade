@@ -4,6 +4,7 @@ import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { Testimonials } from "@/components/testimonials";
 import { TradingViewWidgets } from "@/components/trading-view-widgets";
+import { TradeNotifications } from "@/components/trade-notifications";
 
 const Index = () => {
   return (
@@ -29,6 +30,9 @@ const Index = () => {
       
       {/* Testimonials Section */}
       <Testimonials />
+      
+      {/* Initialize trade notifications */}
+      <TradeNotifications />
     </div>
   );
 };
