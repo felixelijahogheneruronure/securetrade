@@ -43,6 +43,14 @@ export function TradeNotifications() {
           BorderColor: '#ffc552',
           TextColor: 'white',
           IconColor: '#ffffff',
+          // Random positioning
+          LocationTop: [Math.random() > 0.5, Math.floor(Math.random() * 70) + '%'],
+          LocationBottom: [Math.random() > 0.5, Math.floor(Math.random() * 30) + '%'],
+          LocationRight: [Math.random() > 0.5, Math.floor(Math.random() * 30) + '%'],
+          LocationLeft: [Math.random() > 0.5, Math.floor(Math.random() * 30) + '%'],
+          // Random animations
+          AnimationEffectOpen: ['fadeIn', 'fadeInUp', 'fadeInDown', 'fadeInLeft', 'fadeInRight'][Math.floor(Math.random() * 5)],
+          AnimationEffectClose: ['fadeOut', 'fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight'][Math.floor(Math.random() * 5)],
           Number: 80,
           Link: [false, 'https://securetrade.live', '_blank']
         });
@@ -60,6 +68,10 @@ declare global {
     Notification: (options: any) => JQuery;
   }
   interface Window {
-    jQuery: JQueryStatic;
+    jQuery: JQueryStatic & {
+      fn: {
+        Notification: any
+      }
+    };
   }
 }

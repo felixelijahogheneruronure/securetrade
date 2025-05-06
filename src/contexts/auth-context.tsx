@@ -37,11 +37,11 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Sample wallet data for new users
+// Sample wallet data for new users with $100 bonus in USDC
 const DEFAULT_WALLETS = [
-  { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
-  { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 2.0, value: 4120.75, change: -0.5 },
-  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 1000, value: 1000, change: 0 },
+  { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0, value: 0, change: 1.8 },
+  { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 0, value: 0, change: -0.5 },
+  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 100, value: 100, change: 0 },
 ];
 
 // Admin account details
@@ -118,6 +118,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return false;
     }
   }
+
+  // Create a welcome notification for a new user
+  const createWelcomeNotification = async (userId: string, username: string) => {
+    try {
+      const notifRes = await fetchFromJsonBin(JSONBIN_CONFIG.BINS.NOTIFICATIONS);
+      const notifications = Array.isArray(notifRes.record) ? notifRes.record : [];
+      
+      // Create welcome notification
+      const welcomeNotification = {
+        id: `welcome_${userId}_${Date.now()}`,
+        title: "Welcome to Secure Trade!",
+        message: `Welcome ${username}! You have just received a welcome bonus of $100. Kindly top up your account to start earning.`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        type: "personal",
+        recipientId: userId
+      };
+      
+      // Add notification to the list
+      notifications.push(welcomeNotification);
+      await updateJsonBin(JSONBIN_CONFIG.BINS.NOTIFICATIONS, notifications);
+      
+      console.log("Welcome notification created for user:", userId);
+    } catch (error) {
+      console.error("Failed to create welcome notification:", error);
+    }
+  };
 
   const updateUserWallets = async (userId: string, wallets: UserWallet[]): Promise<boolean> => {
     try {
@@ -205,9 +232,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
 
-      // Create new user with default wallets
+      // Create new user with default wallets (including $100 bonus in USDC)
+      const userId = 'user_' + Math.floor(Math.random() * 999999);
       const newUser = {
-        user_id: 'user_' + Math.floor(Math.random() * 999999),
+        user_id: userId,
         email,
         username,
         auth_provider: 'local',
@@ -222,11 +250,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const success = await updateUsers(users);
 
       if (success) {
+        // Create welcome notification
+        await createWelcomeNotification(userId, username);
+        
         // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = newUser;
         toast.success("Registration successful! Logging you in...");
         setUser(userWithoutPassword as User);
         localStorage.setItem("universal_trade_user", JSON.stringify(userWithoutPassword));
+        
+        // Show welcome message with bonus info
+        toast.success(`Welcome ${username}! You've received a $100 bonus.`);
         
         if (userWithoutPassword.isAdmin || userWithoutPassword.role === 'admin') {
           navigate("/admin");
