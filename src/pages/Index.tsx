@@ -2,6 +2,7 @@
 import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { Testimonials } from "@/components/testimonials";
+import { TradingViewWidgets } from "@/components/tradingview-widgets";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -116,6 +117,7 @@ const Index = () => {
     <div>
       <Hero />
       <Features />
+      <TradingViewWidgets />
       <Testimonials />
     </div>
   );

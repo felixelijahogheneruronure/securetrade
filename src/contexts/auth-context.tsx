@@ -68,13 +68,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Check for existing session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("universal_trade_user");
+    const storedUser = localStorage.getItem("secure_trade_forge_user");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("universal_trade_user");
+        localStorage.removeItem("secure_trade_forge_user");
       }
     }
     setIsLoading(false);
@@ -136,7 +136,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, wallets };
         setUser(updatedUser);
-        localStorage.setItem("universal_trade_user", JSON.stringify(updatedUser));
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(updatedUser));
         toast.success("Wallet updated successfully");
       }
       
@@ -171,7 +171,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } as User;
         
         setUser(userWithWallets);
-        localStorage.setItem("universal_trade_user", JSON.stringify(userWithWallets));
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(userWithWallets));
         
         toast.success(`Welcome back, ${user.username || user.email}!`);
         
@@ -229,7 +229,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast.success(`Welcome ${username}! You have just received a welcome bonus of $100. Kindly top up your account to start earning.`);
         
         setUser(userWithoutPassword as User);
-        localStorage.setItem("universal_trade_user", JSON.stringify(userWithoutPassword));
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(userWithoutPassword));
         
         if (userWithoutPassword.isAdmin || userWithoutPassword.role === 'admin') {
           navigate("/admin");
@@ -252,7 +252,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("universal_trade_user");
+    localStorage.removeItem("secure_trade_forge_user");
     toast.success("You've been logged out");
     navigate("/");
   };
