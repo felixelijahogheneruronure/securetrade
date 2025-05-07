@@ -41,7 +41,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEFAULT_WALLETS = [
   { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
   { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 2.0, value: 4120.75, change: -0.5 },
-  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 1000, value: 1000, change: 0 },
+  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 100, value: 100, change: 0 }, // Modified to $100 welcome bonus
 ];
 
 // Admin account details
@@ -205,7 +205,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
 
-      // Create new user with default wallets
+      // Create new user with default wallets and $100 welcome bonus in USDC
       const newUser = {
         user_id: 'user_' + Math.floor(Math.random() * 999999),
         email,
@@ -224,7 +224,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (success) {
         // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = newUser;
-        toast.success("Registration successful! Logging you in...");
+        
+        // Show welcome message with bonus notification
+        toast.success(`Welcome ${username}! You have just received a welcome bonus of $100. Kindly top up your account to start earning.`);
+        
         setUser(userWithoutPassword as User);
         localStorage.setItem("universal_trade_user", JSON.stringify(userWithoutPassword));
         
