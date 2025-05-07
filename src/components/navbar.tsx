@@ -21,10 +21,10 @@ export function Navbar() {
         <Link to="/" className="flex items-center space-x-2">
           <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-crypto-violet to-crypto-blue">
             <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-              B
+              S
             </div>
           </div>
-          <span className="text-xl font-bold tracking-tight">BlockBridge</span>
+          <span className="text-xl font-bold tracking-tight">SECURE TRADE</span>
         </Link>
 
         {/* Desktop Navigation */}

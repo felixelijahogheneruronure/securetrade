@@ -71,6 +71,11 @@ export default {
           cyan: "#06B6D4",
           "light-blue": "#3B82F6",
         },
+        gold: {
+          DEFAULT: "#ffc552",
+          light: "#ffe0a3",
+          dark: "#cc9933",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -114,13 +119,13 @@ export default {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "hero-pattern":
-          "linear-gradient(120deg, #8B5CF6 0%, #4F46E5 50%, #1E3A8A 100%)",
+          "linear-gradient(120deg, #ffc552 0%, #cc9933 50%, #000000 100%)",
         "card-gradient": 
-          "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+          "linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(15,15,15,0.8) 100%)",
       },
       boxShadow: {
         glass: "0 4px 30px rgba(0, 0, 0, 0.1)",
-        glow: "0 0 20px rgba(139, 92, 246, 0.5)",
+        glow: "0 0 20px rgba(255, 197, 82, 0.5)",
       },
     },
   },

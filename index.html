@@ -4,24 +4,316 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SECURE TRADE FORGE - Secure Crypto Trading Platform</title>
-    <meta name="description" content="SECURE TRADE FORGE - A secure, modern full-stack crypto broker platform for buying, selling, and managing cryptocurrencies" />
+    <title>SECURE TRADE - Premium Crypto Trading Platform</title>
+    <meta name="description" content="SECURE TRADE - A secure, modern full-stack crypto broker platform for buying, selling, and managing cryptocurrencies" />
     <meta name="author" content="Lovable" />
 
-    <meta property="og:title" content="SECURE TRADE FORGE - Secure Crypto Trading Platform" />
-    <meta property="og:description" content="SECURE TRADE FORGE - A secure, modern full-stack crypto broker platform for buying, selling, and managing cryptocurrencies" />
+    <meta property="og:title" content="SECURE TRADE - Premium Crypto Trading Platform" />
+    <meta property="og:description" content="SECURE TRADE - A secure, modern full-stack crypto broker platform for buying, selling, and managing cryptocurrencies" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- jQuery for notifications -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Notification plugin CSS -->
+    <style>
+      .custom-notification {
+        position: fixed;
+        z-index: 9999;
+        display: none;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        max-width: 320px;
+      }
+      .notification-icon {
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+      .notification-content {
+        flex-grow: 1;
+      }
+      .animated {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 40px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translate3d(0, -40px, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+      @keyframes fadeInLeft {
+        from {
+          opacity: 0;
+          transform: translate3d(-40px, 0, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+      @keyframes fadeInRight {
+        from {
+          opacity: 0;
+          transform: translate3d(40px, 0, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+      @keyframes fadeOutUp {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translate3d(0, -40px, 0);
+        }
+      }
+      @keyframes fadeOutDown {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translate3d(0, 40px, 0);
+        }
+      }
+      @keyframes fadeOutLeft {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translate3d(-40px, 0, 0);
+        }
+      }
+      @keyframes fadeOutRight {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translate3d(40px, 0, 0);
+        }
+      }
+      .fadeInUp { animation-name: fadeInUp; }
+      .fadeInDown { animation-name: fadeInDown; }
+      .fadeInLeft { animation-name: fadeInLeft; }
+      .fadeInRight { animation-name: fadeInRight; }
+      .fadeOutUp { animation-name: fadeOutUp; }
+      .fadeOutDown { animation-name: fadeOutDown; }
+      .fadeOutLeft { animation-name: fadeOutLeft; }
+      .fadeOutRight { animation-name: fadeOutRight; }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
+    <div id="notification-container">
+      <div id="notification-1"></div>
+      <div id="notification-2"></div>
+      <div id="notification-3"></div>
+      <div id="notification-4"></div>
+    </div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Notification System -->
+    <script>
+      // Notification Plugin
+      (function($) {
+        $.fn.Notification = function(options) {
+          const settings = $.extend({
+            Varible1: ["John", "Jane"],
+            Varible2: ["USA", "UK"],
+            Amount: [1000, 2000],
+            Content: '[Varible1] from [Varible2] just earned <b>$[Amount]</b>!',
+            Show: ['stable', 7, 12],
+            Close: 6,
+            Time: [0, 23],
+            AnimationEffectOpen: 'fadeInUp',
+            AnimationEffectClose: 'fadeOutDown',
+            Number: 80,
+            Link: [false, 'https://securetrade.com', '_blank']
+          }, options);
+          
+          const currentHour = new Date().getHours();
+          if (currentHour >= settings.Time[0] && currentHour <= settings.Time[1]) {
+            const target = this;
+            
+            // Create notification element
+            const notificationElement = $('<div class="custom-notification animated"></div>');
+            
+            // Style the notification
+            notificationElement.css({
+              'background-color': settings.Background || '#000000',
+              'border-radius': (settings.BorderRadius || 8) + 'px',
+              'border': (settings.BorderWidth || 1) + 'px solid ' + (settings.BorderColor || '#ffc552'),
+              'color': settings.TextColor || 'white'
+            });
+            
+            // Notification icon
+            const iconElement = $('<div class="notification-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16V12" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8H12.01" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>');
+            
+            // Show notifications
+            let notificationCount = 0;
+            
+            function showNotification() {
+              if (notificationCount >= settings.Number) return;
+              
+              // Get random variables
+              const name = settings.Varible1[Math.floor(Math.random() * settings.Varible1.length)];
+              const country = settings.Varible2[Math.floor(Math.random() * settings.Varible2.length)];
+              const amount = settings.Amount[Math.floor(Math.random() * settings.Amount.length)];
+              
+              // Create content
+              let content = settings.Content
+                .replace('[Varible1]', name)
+                .replace('[Varible2]', country)
+                .replace('[Amount]', amount);
+                
+              const contentElement = $('<div class="notification-content"></div>').html(content);
+              
+              // Assemble notification
+              notificationElement.empty().append(iconElement.clone()).append(contentElement);
+              
+              // Add link if needed
+              if (settings.Link[0]) {
+                notificationElement.css('cursor', 'pointer');
+                notificationElement.on('click', function() {
+                  window.open(settings.Link[1], settings.Link[2]);
+                });
+              }
+
+              // Random position for notification
+              const positions = [
+                { top: Math.floor(Math.random() * 70) + 10 + '%', left: '10px', right: 'auto', bottom: 'auto' },
+                { top: Math.floor(Math.random() * 70) + 10 + '%', left: 'auto', right: '10px', bottom: 'auto' },
+                { top: 'auto', left: Math.floor(Math.random() * 70) + 10 + '%', right: 'auto', bottom: '10px' },
+                { top: '10px', left: Math.floor(Math.random() * 70) + 10 + '%', right: 'auto', bottom: 'auto' }
+              ];
+              
+              const randomPosition = positions[Math.floor(Math.random() * positions.length)];
+              notificationElement.css(randomPosition);
+
+              // Random animation effects
+              const animationEffects = ['fadeInUp', 'fadeInDown', 'fadeInLeft', 'fadeInRight'];
+              const closeAnimationEffects = ['fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight'];
+              const randomAnimationIndex = Math.floor(Math.random() * animationEffects.length);
+              const openEffect = animationEffects[randomAnimationIndex];
+              const closeEffect = closeAnimationEffects[randomAnimationIndex];
+              
+              // Add to DOM
+              target.append(notificationElement);
+              
+              // Show with animation
+              notificationElement.show().addClass(openEffect);
+              
+              // Hide after delay
+              setTimeout(function() {
+                notificationElement.removeClass(openEffect).addClass(closeEffect);
+                
+                setTimeout(function() {
+                  notificationElement.hide().removeClass(closeEffect);
+                }, 800);
+              }, settings.Close * 1000);
+              
+              notificationCount++;
+              
+              // Schedule next notification
+              let nextTime;
+              if (settings.Show[0] === 'stable') {
+                nextTime = (Math.floor(Math.random() * (settings.Show[2] - settings.Show[1] + 1)) + settings.Show[1]) * 1000;
+              } else {
+                nextTime = settings.Show[1] * 1000;
+              }
+              
+              setTimeout(showNotification, nextTime);
+            }
+            
+            // Start showing notifications after a delay
+            setTimeout(showNotification, 3000);
+          }
+          
+          return this;
+        };
+      })(jQuery);
+      
+      // Initialize notifications after page load
+      $(document).ready(function() {
+          $('#notification-1').Notification({
+              // Names (expanded with more Brazilians and international variety)
+              Varible1: [
+                  "Dirk", "Johnny", "Watkin", "Alejandro", "Vina", "Tony", "Ahmed", "Jackson", "Noah", "Aiden", "Darren", "Isabella", "Aria", "John", "Greyson", 
+                  "Peter", "Mohammed", "William", "Lucas", "Amelia", "Mason", "Mathew", "Richard", "Chris", "Mia", "Oliver",
+                  "João", "Mateus", "Gabriel", "Rafael", "Thiago", "Enzo", "Caio", "Bruno", "Leonardo", "Gustavo", "Felipe", 
+                  "André", "Daniel", "Vinícius", "Henrique", "Sofia", "Beatriz", "Júlia", "Larissa", "Camila", "Mariana", "Isadora", 
+                  "Ana Clara", "Rafaela", "Bianca", "Letícia", "Vitória", "Manuela", "Fernanda", "Eduardo", "Carla", "Luiz", "Clara", "Giovana"
+              ],
+  
+              // Countries (increased 30%+)
+              Varible2: [
+                  "USA", "UAE", "ITALY", "FLORIDA", "MEXICO", "INDIA", "CHINA", "CAMBODIA", "UNITED KINGDOM", "GERMANY",
+                  "AUSTRALIA", "BANGLADESH", "SWEDEN", "PAKISTAN", "MALDIVES", "SEYCHELLES", "BOLIVIA", "SOUTH AFRICA",
+                  "AFGHANISTAN", "ALBANIA", "ALGERIA", "ANDORRA", "ZAMBIA", "ZIMBABWE", "LEBANON", "SAUDI ARABIA", "CHILE", 
+                  "PUERTO RICO", "NIGERIA", "GHANA", "KENYA", "BRAZIL", "ARGENTINA", "SPAIN", "FRANCE", "THAILAND", "VIETNAM", 
+                  "TURKEY", "SINGAPORE", "NEPAL", "UGANDA", "MOROCCO", "PHILIPPINES", "ROMANIA", "POLAND", "CUBA", "COLOMBIA"
+              ],
+  
+              // Amounts
+              Amount: [1000, 2500, 5550, 6660, 4454, 3833, 6969, 3200, 4750, 1020],
+  
+              // Notification content
+              Content: '[Varible1] from [Varible2] just earned <b>$[Amount]</b>!',
+  
+              // Stable and neutral timing
+              Show: ['stable', 7, 12],
+              Close: 6,
+              Time: [0, 23],
+  
+              // Style
+              Background: '#000000',
+              BorderRadius: 8,
+              BorderWidth: 1,
+              BorderColor: '#ffc552',
+              TextColor: 'white',
+              IconColor: '#ffffff',
+  
+              // Animation - now handled dynamically
+              AnimationEffectOpen: 'fadeInUp', // Default, will be overridden
+              AnimationEffectClose: 'fadeOutDown', // Default, will be overridden
+  
+              // Number of notifications doubled
+              Number: 80,
+  
+              // Notification link
+              Link: [false, 'https://securetrade.live', '_blank']
+          });
+      });
+    </script>
   </body>
 </html>
