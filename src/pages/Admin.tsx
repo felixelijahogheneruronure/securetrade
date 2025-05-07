@@ -7,8 +7,6 @@ import { CurrentClients } from "@/components/admin/current-clients";
 import { TransactionOverview } from "@/components/admin/transaction-overview";
 import { UserManagement } from "@/components/admin/user-management";
 import { NotificationManagement } from "@/components/admin/notification-management";
-import { FundingManagement } from "@/components/admin/funding-management";
-import { WithdrawalManagement } from "@/components/admin/withdrawal-management";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { NotificationPanel } from "@/components/user/notification-panel";
@@ -87,38 +85,6 @@ const NotificationsPage = () => {
   );
 };
 
-// Funding management page component
-const FundingPage = () => {
-  return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Funding Requests</h2>
-        <p className="text-muted-foreground">
-          Manage user funding requests and approvals
-        </p>
-      </div>
-      
-      <FundingManagement />
-    </div>
-  );
-};
-
-// Withdrawal management page component
-const WithdrawalsPage = () => {
-  return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Withdrawal Requests</h2>
-        <p className="text-muted-foreground">
-          Manage user withdrawal requests and approvals
-        </p>
-      </div>
-      
-      <WithdrawalManagement />
-    </div>
-  );
-};
-
 const Admin = () => {
   const { user, logout } = useAuth();
   const { toast } = useToast();
@@ -183,8 +149,6 @@ const Admin = () => {
           <Route path="/" element={<AdminHome />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/funding" element={<FundingPage />} />
-          <Route path="/withdrawals" element={<WithdrawalsPage />} />
           <Route path="/trading" element={<TradingRoom />} />
           {/* Add more routes as needed */}
         </Routes>

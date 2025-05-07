@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { JSONBIN_CONFIG, fetchFromJsonBin, updateJsonBin } from "@/utils/jsonbin-api";
 
 // Define user type
 type User = {
@@ -13,7 +12,6 @@ type User = {
   account_status: string;
   wallets?: UserWallet[];
   isAdmin?: boolean;
-  role?: string;
 };
 
 export type UserWallet = {
@@ -37,6 +35,10 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// JSONBin constants
+const BIN_ID = '681568f78a456b79669672dc';
+const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
+
 // Sample wallet data for new users
 const DEFAULT_WALLETS = [
   { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
@@ -52,7 +54,6 @@ const ADMIN_ACCOUNT = {
   auth_provider: 'local',
   password: 'admin',
   account_status: 'active',
-  role: 'admin',
   isAdmin: true,
   wallets: [
     { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 10.0, value: 608000, change: 1.8 },
@@ -68,13 +69,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Check for existing session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("universal_trade_user");
+    const storedUser = localStorage.getItem("blockbridge_user");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("universal_trade_user");
+        localStorage.removeItem("blockbridge_user");
       }
     }
     setIsLoading(false);
@@ -101,8 +102,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   async function getUsers() {
     try {
-      const res = await fetchFromJsonBin(JSONBIN_CONFIG.BINS.USERS);
-      return res.record || [];
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': MASTER_KEY
+        }
+      });
+      const data = await res.json();
+      return data.record.users || [];
     } catch (error) {
       console.error("Failed to fetch users:", error);
       return [];
@@ -111,7 +117,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   async function updateUsers(users: User[]) {
     try {
-      await updateJsonBin(JSONBIN_CONFIG.BINS.USERS, users);
+      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY,
+          'X-Bin-Private': 'true'
+        },
+        body: JSON.stringify({ users })
+      });
       return true;
     } catch (error) {
       console.error("Failed to update users:", error);
@@ -136,7 +150,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, wallets };
         setUser(updatedUser);
-        localStorage.setItem("universal_trade_user", JSON.stringify(updatedUser));
+        localStorage.setItem("blockbridge_user", JSON.stringify(updatedUser));
         toast.success("Wallet updated successfully");
       }
       
@@ -158,7 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (user) {
         // Determine if user is admin
-        const isAdmin = user.role === 'admin' || user.isAdmin || email === ADMIN_ACCOUNT.email;
+        const isAdmin = user.isAdmin || email === ADMIN_ACCOUNT.email;
         
         // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = user;
@@ -171,7 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } as User;
         
         setUser(userWithWallets);
-        localStorage.setItem("universal_trade_user", JSON.stringify(userWithWallets));
+        localStorage.setItem("blockbridge_user", JSON.stringify(userWithWallets));
         
         toast.success(`Welcome back, ${user.username || user.email}!`);
         
@@ -207,13 +221,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Create new user with default wallets
       const newUser = {
-        user_id: 'user_' + Math.floor(Math.random() * 999999),
+        user_id: 'local_' + Math.floor(Math.random() * 999999),
         email,
         username,
         auth_provider: 'local',
         password,
         account_status: 'active',
-        role: email.includes('admin') ? 'admin' : 'user',
         wallets: DEFAULT_WALLETS,
         isAdmin: email.includes('admin')
       };
@@ -226,9 +239,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const { password: _, ...userWithoutPassword } = newUser;
         toast.success("Registration successful! Logging you in...");
         setUser(userWithoutPassword as User);
-        localStorage.setItem("universal_trade_user", JSON.stringify(userWithoutPassword));
+        localStorage.setItem("blockbridge_user", JSON.stringify(userWithoutPassword));
         
-        if (userWithoutPassword.isAdmin || userWithoutPassword.role === 'admin') {
+        if (userWithoutPassword.isAdmin) {
           navigate("/admin");
         } else {
           navigate("/dashboard");
@@ -249,7 +262,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("universal_trade_user");
+    localStorage.removeItem("blockbridge_user");
     toast.success("You've been logged out");
     navigate("/");
   };
