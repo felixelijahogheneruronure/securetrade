@@ -68,7 +68,7 @@ declare global {
     Notification: (options: any) => JQuery;
   }
   interface Window {
-    jQuery: JQueryStatic & {
+    jQuery: any & {
       fn: {
         Notification: any
       }
