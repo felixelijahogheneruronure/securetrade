@@ -1,11 +1,54 @@
 
-import React from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
+declare global {
+  interface Window {
+    TradingView: any;
+  }
+}
+
 const TradingRoom = () => {
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Load TradingView script
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/tv.js";
+    script.async = true;
+    script.onload = initializeCharts;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const initializeCharts = () => {
+    if (window.TradingView) {
+      loadChart("bch_chart", "BINANCE:BCHUSDT");
+      loadChart("btc_chart", "BINANCE:BTCUSDT");
+      loadChart("eurusd_chart", "OANDA:EURUSD");
+      loadChart("eth_chart", "BINANCE:ETHUSDT");
+    }
+  };
+
+  const loadChart = (containerId: string, symbol: string) => {
+    new window.TradingView.widget({
+      width: "100%",
+      height: 300,
+      symbol: symbol,
+      interval: "1",
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      hide_legend: false,
+      container_id: containerId
+    });
+  };
 
   const handleTrade = (action: string, coin: string) => {
     toast({
@@ -30,11 +73,7 @@ const TradingRoom = () => {
             <CardTitle className="text-xl text-lime-500">BCH/USDT</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] bg-black/50 flex items-center justify-center mb-4">
-              <p className="text-center text-muted-foreground">
-                Visit the home page to view real-time market data and charts
-              </p>
-            </div>
+            <div id="bch_chart" className="h-[300px]"></div>
             <div className="flex gap-4 mt-4">
               <Button 
                 variant="default" 
@@ -59,11 +98,7 @@ const TradingRoom = () => {
             <CardTitle className="text-xl text-lime-500">BTC/USDT</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] bg-black/50 flex items-center justify-center mb-4">
-              <p className="text-center text-muted-foreground">
-                Visit the home page to view real-time market data and charts
-              </p>
-            </div>
+            <div id="btc_chart" className="h-[300px]"></div>
             <div className="flex gap-4 mt-4">
               <Button 
                 variant="default" 
@@ -88,11 +123,7 @@ const TradingRoom = () => {
             <CardTitle className="text-xl text-lime-500">EUR/USD</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] bg-black/50 flex items-center justify-center mb-4">
-              <p className="text-center text-muted-foreground">
-                Visit the home page to view real-time market data and charts
-              </p>
-            </div>
+            <div id="eurusd_chart" className="h-[300px]"></div>
             <div className="flex gap-4 mt-4">
               <Button 
                 variant="default" 
@@ -117,11 +148,7 @@ const TradingRoom = () => {
             <CardTitle className="text-xl text-lime-500">ETH/USDT</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] bg-black/50 flex items-center justify-center mb-4">
-              <p className="text-center text-muted-foreground">
-                Visit the home page to view real-time market data and charts
-              </p>
-            </div>
+            <div id="eth_chart" className="h-[300px]"></div>
             <div className="flex gap-4 mt-4">
               <Button 
                 variant="default" 

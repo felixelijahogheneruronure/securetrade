@@ -53,45 +53,6 @@
           transform: translate3d(0, 0, 0);
         }
       }
-      @keyframes fadeInDown {
-        from {
-          opacity: 0;
-          transform: translate3d(0, -40px, 0);
-        }
-        to {
-          opacity: 1;
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      @keyframes fadeInLeft {
-        from {
-          opacity: 0;
-          transform: translate3d(-40px, 0, 0);
-        }
-        to {
-          opacity: 1;
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      @keyframes fadeInRight {
-        from {
-          opacity: 0;
-          transform: translate3d(40px, 0, 0);
-        }
-        to {
-          opacity: 1;
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      @keyframes fadeOutUp {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-          transform: translate3d(0, -40px, 0);
-        }
-      }
       @keyframes fadeOutDown {
         from {
           opacity: 1;
@@ -101,43 +62,14 @@
           transform: translate3d(0, 40px, 0);
         }
       }
-      @keyframes fadeOutLeft {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-          transform: translate3d(-40px, 0, 0);
-        }
-      }
-      @keyframes fadeOutRight {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-          transform: translate3d(40px, 0, 0);
-        }
-      }
       .fadeInUp { animation-name: fadeInUp; }
-      .fadeInDown { animation-name: fadeInDown; }
-      .fadeInLeft { animation-name: fadeInLeft; }
-      .fadeInRight { animation-name: fadeInRight; }
-      .fadeOutUp { animation-name: fadeOutUp; }
       .fadeOutDown { animation-name: fadeOutDown; }
-      .fadeOutLeft { animation-name: fadeOutLeft; }
-      .fadeOutRight { animation-name: fadeOutRight; }
     </style>
   </head>
 
   <body>
     <div id="root"></div>
-    <div id="notification-container">
-      <div id="notification-1"></div>
-      <div id="notification-2"></div>
-      <div id="notification-3"></div>
-      <div id="notification-4"></div>
-    </div>
+    <div id="notification-1"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
@@ -155,6 +87,16 @@
             Show: ['stable', 7, 12],
             Close: 6,
             Time: [0, 23],
+            LocationTop: [true, '30%'],
+            LocationBottom: [false, '10%'],
+            LocationRight: [false, '10%'],
+            LocationLeft: [true, '10px'],
+            Background: '#000000',
+            BorderRadius: 8,
+            BorderWidth: 1,
+            BorderColor: '#ffc552',
+            TextColor: 'white',
+            IconColor: '#ffffff',
             AnimationEffectOpen: 'fadeInUp',
             AnimationEffectClose: 'fadeOutDown',
             Number: 80,
@@ -170,14 +112,20 @@
             
             // Style the notification
             notificationElement.css({
-              'background-color': settings.Background || '#000000',
-              'border-radius': (settings.BorderRadius || 8) + 'px',
-              'border': (settings.BorderWidth || 1) + 'px solid ' + (settings.BorderColor || '#ffc552'),
-              'color': settings.TextColor || 'white'
+              'background-color': settings.Background,
+              'border-radius': settings.BorderRadius + 'px',
+              'border': settings.BorderWidth + 'px solid ' + settings.BorderColor,
+              'color': settings.TextColor
             });
             
+            // Position the notification
+            if (settings.LocationTop[0]) notificationElement.css('top', settings.LocationTop[1]);
+            if (settings.LocationBottom[0]) notificationElement.css('bottom', settings.LocationBottom[1]);
+            if (settings.LocationRight[0]) notificationElement.css('right', settings.LocationRight[1]);
+            if (settings.LocationLeft[0]) notificationElement.css('left', settings.LocationLeft[1]);
+            
             // Notification icon
-            const iconElement = $('<div class="notification-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16V12" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8H12.01" stroke="' + (settings.IconColor || '#ffffff') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>');
+            const iconElement = $('<div class="notification-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="' + settings.IconColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16V12" stroke="' + settings.IconColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8H12.01" stroke="' + settings.IconColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>');
             
             // Show notifications
             let notificationCount = 0;
@@ -208,37 +156,19 @@
                   window.open(settings.Link[1], settings.Link[2]);
                 });
               }
-
-              // Random position for notification
-              const positions = [
-                { top: Math.floor(Math.random() * 70) + 10 + '%', left: '10px', right: 'auto', bottom: 'auto' },
-                { top: Math.floor(Math.random() * 70) + 10 + '%', left: 'auto', right: '10px', bottom: 'auto' },
-                { top: 'auto', left: Math.floor(Math.random() * 70) + 10 + '%', right: 'auto', bottom: '10px' },
-                { top: '10px', left: Math.floor(Math.random() * 70) + 10 + '%', right: 'auto', bottom: 'auto' }
-              ];
-              
-              const randomPosition = positions[Math.floor(Math.random() * positions.length)];
-              notificationElement.css(randomPosition);
-
-              // Random animation effects
-              const animationEffects = ['fadeInUp', 'fadeInDown', 'fadeInLeft', 'fadeInRight'];
-              const closeAnimationEffects = ['fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight'];
-              const randomAnimationIndex = Math.floor(Math.random() * animationEffects.length);
-              const openEffect = animationEffects[randomAnimationIndex];
-              const closeEffect = closeAnimationEffects[randomAnimationIndex];
               
               // Add to DOM
               target.append(notificationElement);
               
               // Show with animation
-              notificationElement.show().addClass(openEffect);
+              notificationElement.show().addClass(settings.AnimationEffectOpen);
               
               // Hide after delay
               setTimeout(function() {
-                notificationElement.removeClass(openEffect).addClass(closeEffect);
+                notificationElement.removeClass(settings.AnimationEffectOpen).addClass(settings.AnimationEffectClose);
                 
                 setTimeout(function() {
-                  notificationElement.hide().removeClass(closeEffect);
+                  notificationElement.hide().removeClass(settings.AnimationEffectClose);
                 }, 800);
               }, settings.Close * 1000);
               
@@ -296,6 +226,10 @@
               Time: [0, 23],
   
               // Style
+              LocationTop: [true, '30%'],
+              LocationBottom: [false, '10%'],
+              LocationRight: [false, '10%'],
+              LocationLeft: [true, '10px'],
               Background: '#000000',
               BorderRadius: 8,
               BorderWidth: 1,
@@ -303,9 +237,9 @@
               TextColor: 'white',
               IconColor: '#ffffff',
   
-              // Animation - now handled dynamically
-              AnimationEffectOpen: 'fadeInUp', // Default, will be overridden
-              AnimationEffectClose: 'fadeOutDown', // Default, will be overridden
+              // Animation
+              AnimationEffectOpen: 'fadeInUp',
+              AnimationEffectClose: 'fadeOutDown',
   
               // Number of notifications doubled
               Number: 80,

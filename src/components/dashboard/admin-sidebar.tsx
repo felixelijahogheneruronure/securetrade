@@ -100,10 +100,10 @@ export function AdminSidebar({ isCollapsed = false }: AdminSidebarProps) {
         <Link to="/admin" className="flex items-center">
           <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-crypto-violet to-crypto-blue">
             <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-              S
+              U
             </div>
           </div>
-          {!isCollapsed && <span className="ml-2 text-xl font-bold">Secure Trade</span>}
+          {!isCollapsed && <span className="ml-2 text-xl font-bold">Universal</span>}
         </Link>
       </div>
       
@@ -123,7 +123,7 @@ export function AdminSidebar({ isCollapsed = false }: AdminSidebarProps) {
                   : "px-3",
                 location.pathname === item.href
                   ? "bg-primary text-primary-foreground"
-                  : "text-foreground/80 hover:bg-secondary/80 hover:text-foreground"
+                  : "text-foreground/70 hover:bg-secondary/80 hover:text-foreground"
               )}
               title={isCollapsed ? item.title : undefined}
             >

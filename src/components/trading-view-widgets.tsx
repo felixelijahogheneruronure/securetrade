@@ -38,14 +38,14 @@ export function TradingViewWidgets() {
   return (
     <div className="space-y-8">
       {/* Advanced Chart Widget */}
-      <div className="widget-container rounded-lg overflow-hidden border border-gold/30">
+      <div className="widget-container">
         <div className="tradingview-widget-container">
           <div id="tradingview_advanced_chart" ref={advanced_chart}></div>
         </div>
       </div>
       
       {/* Ticker Tape Widget */}
-      <div className="widget-container rounded-lg overflow-hidden border border-gold/30">
+      <div className="widget-container">
         <div className="tradingview-widget-container">
           <div className="tradingview-widget-container__widget" ref={tickerRef}></div>
           <script type="text/javascript">
@@ -69,7 +69,7 @@ export function TradingViewWidgets() {
       {/* Market Overview and Technical Analysis in a grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Market Overview Widget */}
-        <div className="widget-container h-[450px] rounded-lg overflow-hidden border border-gold/30">
+        <div className="widget-container h-[450px]">
           <div className="tradingview-widget-container h-full">
             <div className="tradingview-widget-container__widget h-full" ref={marketOverviewRef}></div>
             <script type="text/javascript">
@@ -115,7 +115,7 @@ export function TradingViewWidgets() {
         </div>
         
         {/* Technical Analysis Widget */}
-        <div className="widget-container h-[450px] rounded-lg overflow-hidden border border-gold/30">
+        <div className="widget-container h-[450px]">
           <div className="tradingview-widget-container h-full">
             <div className="tradingview-widget-container__widget h-full" ref={technicalRef}></div>
             <script type="text/javascript">
@@ -135,7 +135,7 @@ export function TradingViewWidgets() {
       </div>
       
       {/* Economic Calendar Widget */}
-      <div className="widget-container h-[450px] rounded-lg overflow-hidden border border-gold/30">
+      <div className="widget-container h-[450px]">
         <div className="tradingview-widget-container h-full">
           <div className="tradingview-widget-container__widget h-full" ref={calendarRef}></div>
           <script type="text/javascript">
