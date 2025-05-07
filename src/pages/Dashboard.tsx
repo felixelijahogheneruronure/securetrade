@@ -7,6 +7,10 @@ import { UserSidebar } from "@/components/dashboard/user-sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import WalletsPage from "./WalletsPage";
 import TradingRoom from "./TradingRoom";
+import FundAccount from "./FundAccount";
+import WithdrawFunds from "./WithdrawFunds";
+import TransferFunds from "./TransferFunds";
+import UserMessages from "./UserMessages";
 import { NotificationPanel } from "@/components/user/notification-panel";
 
 const DashboardHome = () => (
@@ -61,6 +65,10 @@ const Dashboard = () => {
           <Route path="/" element={<DashboardHome />} />
           <Route path="/wallets" element={<WalletsPage />} />
           <Route path="/trading" element={<TradingRoom />} />
+          <Route path="/fund" element={<FundAccount />} />
+          <Route path="/withdraw" element={<WithdrawFunds />} />
+          <Route path="/transfer" element={<TransferFunds />} />
+          <Route path="/messages" element={<UserMessages />} />
           {/* Add more routes as needed */}
         </Routes>
       </div>

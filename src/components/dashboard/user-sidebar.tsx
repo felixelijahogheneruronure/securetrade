@@ -8,7 +8,10 @@ import {
   Settings, 
   Users, 
   Wallet,
-  LogOut
+  LogOut,
+  ArrowDown,
+  ArrowUp,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
@@ -26,6 +29,21 @@ const userNavItems = [
     icon: Wallet,
   },
   {
+    title: "Fund Account",
+    href: "/dashboard/fund",
+    icon: ArrowDown,
+  },
+  {
+    title: "Withdraw",
+    href: "/dashboard/withdraw",
+    icon: ArrowUp,
+  },
+  {
+    title: "Transfer",
+    href: "/dashboard/transfer",
+    icon: ArrowRight,
+  },
+  {
     title: "Transactions",
     href: "/dashboard/transactions",
     icon: Clock,
@@ -36,9 +54,9 @@ const userNavItems = [
     icon: BarChart,
   },
   {
-    title: "Trade",
-    href: "/dashboard/trade",
-    icon: CreditCard,
+    title: "Messages",
+    href: "/dashboard/messages",
+    icon: Users,
   },
   {
     title: "Settings",
@@ -57,10 +75,10 @@ export function UserSidebar() {
         <Link to="/dashboard" className="flex items-center">
           <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-crypto-violet to-crypto-blue">
             <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-              B
+              U
             </div>
           </div>
-          <span className="ml-2 text-xl font-bold">Dashboard</span>
+          <span className="ml-2 text-xl font-bold">Universal</span>
         </Link>
       </div>
       
