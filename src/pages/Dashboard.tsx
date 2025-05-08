@@ -23,13 +23,13 @@ const DashboardHome = () => (
     </div>
     
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div className="lg:col-span-8">
+      <div className="lg:col-span-12">
         <PortfolioChart />
       </div>
       <div className="lg:col-span-4">
         <WalletOverview />
       </div>
-      <div className="lg:col-span-12">
+      <div className="lg:col-span-8">
         <ActivityOverview />
       </div>
     </div>

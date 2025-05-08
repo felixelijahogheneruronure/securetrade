@@ -3,20 +3,76 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function PortfolioChart() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const marketOverviewRef = useRef<HTMLDivElement>(null);
+  const technicalAnalysisRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Don't execute during SSR
-    if (!containerRef.current) return;
+    if (!marketOverviewRef.current || !technicalAnalysisRef.current) return;
     
-    // Create TradingView script
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-    script.async = true;
+    // Create Market Overview Widget
+    const marketScript = document.createElement('script');
+    marketScript.type = 'text/javascript';
+    marketScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js';
+    marketScript.async = true;
     
-    // Add configuration
-    script.innerHTML = JSON.stringify({
+    // Add Market Overview configuration
+    marketScript.innerHTML = JSON.stringify({
+      "colorTheme": "dark",
+      "dateRange": "12M",
+      "showChart": true,
+      "locale": "en",
+      "largeChartUrl": "",
+      "isTransparent": false,
+      "width": "100%",
+      "height": "450",
+      "plotLineColorGrowing": "rgba(0, 255, 0, 1)",
+      "plotLineColorFalling": "rgba(255, 0, 0, 1)",
+      "gridLineColor": "rgba(240, 243, 250, 0)",
+      "scaleFontColor": "rgba(120, 123, 134, 1)",
+      "belowLineFillColorGrowing": "rgba(0, 255, 0, 0.05)",
+      "belowLineFillColorFalling": "rgba(255, 0, 0, 0.05)",
+      "symbolActiveColor": "rgba(0, 255, 0, 0.15)",
+      "tabs": [
+        {
+          "title": "Crypto",
+          "symbols": [
+            { "s": "BINANCE:BTCUSDT", "d": "BTC" },
+            { "s": "BINANCE:ETHUSDT", "d": "ETH" },
+            { "s": "BINANCE:BNBUSDT", "d": "BNB" }
+          ],
+          "originalTitle": "Crypto"
+        },
+        {
+          "title": "Forex",
+          "symbols": [
+            { "s": "FX:EURUSD" },
+            { "s": "FX:GBPUSD" },
+            { "s": "FX:USDJPY" }
+          ],
+          "originalTitle": "Forex"
+        }
+      ]
+    });
+    
+    // Clean up existing content and add market overview script
+    if (marketOverviewRef.current) {
+      // Remove any existing scripts
+      const existingMarketScripts = marketOverviewRef.current.querySelectorAll('script');
+      existingMarketScripts.forEach(script => script.remove());
+      
+      // Append new script
+      marketOverviewRef.current.appendChild(marketScript);
+    }
+    
+    // Create Technical Analysis Widget
+    const technicalScript = document.createElement('script');
+    technicalScript.type = 'text/javascript';
+    technicalScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+    technicalScript.async = true;
+    
+    // Add Technical Analysis configuration
+    technicalScript.innerHTML = JSON.stringify({
       "interval": "1m",
       "width": "100%",
       "isTransparent": false,
@@ -27,36 +83,56 @@ export function PortfolioChart() {
       "colorTheme": "dark"
     });
     
-    // Clean up existing content and add new script
-    if (containerRef.current) {
+    // Clean up existing content and add technical analysis script
+    if (technicalAnalysisRef.current) {
       // Remove any existing scripts
-      const existingScripts = containerRef.current.querySelectorAll('script');
-      existingScripts.forEach(script => script.remove());
+      const existingTechnicalScripts = technicalAnalysisRef.current.querySelectorAll('script');
+      existingTechnicalScripts.forEach(script => script.remove());
       
       // Append new script
-      containerRef.current.appendChild(script);
+      technicalAnalysisRef.current.appendChild(technicalScript);
     }
     
     // Cleanup on unmount
     return () => {
-      if (containerRef.current && script.parentNode === containerRef.current) {
-        containerRef.current.removeChild(script);
+      if (marketOverviewRef.current && marketScript.parentNode === marketOverviewRef.current) {
+        marketOverviewRef.current.removeChild(marketScript);
+      }
+      if (technicalAnalysisRef.current && technicalScript.parentNode === technicalAnalysisRef.current) {
+        technicalAnalysisRef.current.removeChild(technicalScript);
       }
     };
   }, []);
   
   return (
-    <Card className="overflow-hidden rounded-xl">
-      <CardHeader>
-        <CardTitle className="text-xl">Portfolio Performance</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[400px] rounded-lg overflow-hidden" ref={containerRef}>
-          <div className="tradingview-widget-container">
-            <div className="tradingview-widget-container__widget"></div>
+    <div className="space-y-6">
+      {/* Market Overview Widget */}
+      <Card className="overflow-hidden rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-xl">Market Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[450px] rounded-lg overflow-hidden" ref={marketOverviewRef}>
+            <div className="tradingview-widget-container">
+              <div className="tradingview-widget-container__widget"></div>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      
+      {/* Technical Analysis Widget */}
+      <Card className="overflow-hidden rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-xl">Portfolio Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] rounded-lg overflow-hidden" ref={technicalAnalysisRef}>
+            <div className="tradingview-widget-container">
+              <div className="tradingview-widget-container__widget"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
