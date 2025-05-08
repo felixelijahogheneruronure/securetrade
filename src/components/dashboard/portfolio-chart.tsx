@@ -1,69 +1,60 @@
 
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-// Mock data for the portfolio value over time
-const portfolioData = [
-  { date: "May 1", value: 48750 },
-  { date: "May 2", value: 49200 },
-  { date: "May 3", value: 48900 },
-  { date: "May 4", value: 49950 },
-  { date: "May 5", value: 50200 },
-  { date: "May 6", value: 49800 },
-  { date: "May 7", value: 50950 },
-  { date: "May 8", value: 51200 },
-  { date: "May 9", value: 51800 },
-  { date: "May 10", value: 52500 },
-  { date: "May 11", value: 52100 },
-  { date: "May 12", value: 52700 },
-  { date: "May 13", value: 53100 },
-  { date: "May 14", value: 52800 },
-];
 
 export function PortfolioChart() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Don't execute during SSR
+    if (!containerRef.current) return;
+    
+    // Create TradingView script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+    script.async = true;
+    
+    // Add configuration
+    script.innerHTML = JSON.stringify({
+      "interval": "1m",
+      "width": "100%",
+      "isTransparent": false,
+      "height": "400",
+      "symbol": "BINANCE:BTCUSDT",
+      "showIntervalTabs": true,
+      "locale": "en",
+      "colorTheme": "dark"
+    });
+    
+    // Clean up existing content and add new script
+    if (containerRef.current) {
+      // Remove any existing scripts
+      const existingScripts = containerRef.current.querySelectorAll('script');
+      existingScripts.forEach(script => script.remove());
+      
+      // Append new script
+      containerRef.current.appendChild(script);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (containerRef.current && script.parentNode === containerRef.current) {
+        containerRef.current.removeChild(script);
+      }
+    };
+  }, []);
+  
   return (
-    <Card>
+    <Card className="overflow-hidden rounded-xl">
       <CardHeader>
         <CardTitle className="text-xl">Portfolio Performance</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={portfolioData}
-              margin={{
-                top: 5,
-                right: 10,
-                left: 10,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12 }} 
-                tickMargin={10} 
-              />
-              <YAxis 
-                tickFormatter={(value) => `$${value.toLocaleString()}`} 
-                width={80}
-                tick={{ fontSize: 12 }}
-                tickMargin={10}
-              />
-              <Tooltip 
-                formatter={(value) => [`$${value.toLocaleString()}`, "Portfolio Value"]} 
-                labelFormatter={(label) => `Date: ${label}`}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke="#8B5CF6" 
-                strokeWidth={2} 
-                dot={{ r: 4 }} 
-                activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2, fill: "white" }} 
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="h-[400px] rounded-lg overflow-hidden" ref={containerRef}>
+          <div className="tradingview-widget-container">
+            <div className="tradingview-widget-container__widget"></div>
+          </div>
         </div>
       </CardContent>
     </Card>
