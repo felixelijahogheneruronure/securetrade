@@ -40,7 +40,7 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background">
       <UserSidebar />
       <div className="flex-1 overflow-y-auto">
         <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -51,9 +51,9 @@ const Dashboard = () => {
                 <span className="mr-2 text-sm font-medium">
                   {user?.username || user?.email}
                 </span>
-                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-crypto-violet to-crypto-blue">
+                <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-red-600 to-black">
                   <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
-                    {user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                    {user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'S'}
                   </div>
                 </div>
               </div>

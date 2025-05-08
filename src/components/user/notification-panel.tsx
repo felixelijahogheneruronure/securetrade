@@ -12,16 +12,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificationItem, Notification } from "@/components/notifications/notification-item";
 import { useAuth } from "@/contexts/auth-context";
-import { useToast } from "@/hooks/use-toast";
-
-// Updated JSONBin constants for notifications
-const NOTIFICATIONS_BIN_URL = 'https://api.jsonbin.io/v3/b/681886c68960c979a593b1c6';
-const MASTER_KEY = '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG';
-const ACCESS_KEY = '$2a$10$ZBvH0BxKCETxq1zcx60ufuO/YIMH63mLSnUcAIxa5sp1DZ72ZDnNS';
+import { toast } from "sonner";
+import { JSONBIN_CONFIG, fetchFromJsonBin, fetchMasterBin } from "@/utils/jsonbin-api";
 
 export function NotificationPanel() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -33,22 +28,21 @@ export function NotificationPanel() {
     
     setLoading(true);
     try {
-      const res = await fetch(`${NOTIFICATIONS_BIN_URL}/latest`, {
-        headers: {
-          'X-Master-Key': MASTER_KEY,
-          'X-Access-Key': ACCESS_KEY
-        }
-      });
+      // First try to use the master bin
+      const masterData = await fetchMasterBin();
+      let notificationsData;
       
-      if (!res.ok) {
-        throw new Error(`Failed to fetch notifications: ${res.status}`);
+      if (masterData?.record?.notifications) {
+        notificationsData = masterData.record.notifications;
+      } else {
+        // Fallback to the direct notifications bin
+        const res = await fetchFromJsonBin(JSONBIN_CONFIG.BINS.NOTIFICATIONS);
+        notificationsData = res.record?.notifications || [];
       }
       
-      const data = await res.json();
-      
-      if (data.record && Array.isArray(data.record.notifications)) {
+      if (Array.isArray(notificationsData)) {
         // Filter notifications for this user (general + personal for this user)
-        const userNotifications = data.record.notifications.filter((notif: Notification) => 
+        const userNotifications = notificationsData.filter((notif: Notification) => 
           notif.type === "general" || 
           (notif.type === "personal" && notif.recipientId === user.user_id) ||
           notif.type === "system"
@@ -60,18 +54,13 @@ export function NotificationPanel() {
         const unread = userNotifications.filter((n: Notification) => !n.isRead).length;
         setUnreadCount(unread);
       } else {
-        // If notifications array doesn't exist, initialize it
-        console.log("No notifications found in JSONBin or structure is invalid");
+        console.log("No notifications found or structure is invalid");
         setNotifications([]);
         setUnreadCount(0);
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load notifications",
-        variant: "destructive"
-      });
+      toast.error("Failed to load notifications");
       setNotifications([]);
       setUnreadCount(0);
     } finally {
@@ -82,21 +71,21 @@ export function NotificationPanel() {
   // Update notifications in the JSONBin
   const updateNotifications = async (updatedNotification: Notification) => {
     try {
-      // First get all notifications
-      const res = await fetch(`${NOTIFICATIONS_BIN_URL}/latest`, {
-        headers: {
-          'X-Master-Key': MASTER_KEY,
-          'X-Access-Key': ACCESS_KEY
-        }
-      });
+      // First try to use the master bin
+      const masterData = await fetchMasterBin();
+      let notificationsUrl;
+      let allNotifications = [];
       
-      if (!res.ok) {
-        throw new Error(`Failed to fetch notifications: ${res.status}`);
+      if (masterData?.record?.notificationsUrl) {
+        notificationsUrl = masterData.record.notificationsUrl;
+        const notificationsData = await fetchFromJsonBin(notificationsUrl);
+        allNotifications = Array.isArray(notificationsData.record) ? notificationsData.record : [];
+      } else {
+        // Fallback to the direct notifications bin
+        const res = await fetchFromJsonBin(JSONBIN_CONFIG.BINS.NOTIFICATIONS);
+        notificationsUrl = JSONBIN_CONFIG.BINS.NOTIFICATIONS;
+        allNotifications = Array.isArray(res.record?.notifications) ? res.record.notifications : [];
       }
-      
-      const data = await res.json();
-      
-      const allNotifications = Array.isArray(data.record?.notifications) ? data.record.notifications : [];
       
       // Update the specific notification
       const updatedNotifications = allNotifications.map((notif: Notification) => 
@@ -104,35 +93,39 @@ export function NotificationPanel() {
       );
       
       // Save back to JSONBin
-      const updateRes = await fetch(`${NOTIFICATIONS_BIN_URL}`, {
+      await fetchFromJsonBin(notificationsUrl); // To ensure we have latest before update
+      
+      // Update the bin with new notifications
+      await fetch(notificationsUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': MASTER_KEY,
-          'X-Access-Key': ACCESS_KEY
+          'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+          'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY
         },
         body: JSON.stringify({ 
-          ...data.record,
           notifications: updatedNotifications 
         })
       });
-      
-      if (!updateRes.ok) {
-        throw new Error(`Failed to update notifications: ${updateRes.status}`);
-      }
       
       // Update local state
       setNotifications(prev => 
         prev.map(notif => notif.id === updatedNotification.id ? updatedNotification : notif)
       );
       
+      // Recalculate unread count
+      const unread = updatedNotifications.filter((n: Notification) => 
+        !n.isRead && 
+        (n.type === "general" || 
+         (n.type === "personal" && n.recipientId === user?.user_id) ||
+         n.type === "system")
+      ).length;
+      
+      setUnreadCount(unread);
+      
     } catch (error) {
       console.error("Failed to update notifications:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update notification status",
-        variant: "destructive"
-      });
+      toast.error("Failed to update notification status");
     }
   };
 
@@ -155,14 +148,7 @@ export function NotificationPanel() {
     const updatedNotification = { ...notification, isRead: true };
     updateNotifications(updatedNotification);
     
-    // Update unread count
-    setUnreadCount(prev => Math.max(0, prev - 1));
-    
-    toast({
-      title: "Notification marked as read",
-      description: "The notification has been marked as read.",
-      duration: 2000
-    });
+    toast.success("Notification marked as read");
   };
 
   const personalNotifications = notifications.filter(n => n.type === "personal");
@@ -175,7 +161,7 @@ export function NotificationPanel() {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px]">
+            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-600 text-white text-[10px]">
               {unreadCount}
             </span>
           )}
@@ -187,7 +173,7 @@ export function NotificationPanel() {
         </SheetHeader>
         {loading ? (
           <div className="flex justify-center p-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-red-600"></div>
           </div>
         ) : (
           <Tabs defaultValue="all" className="w-full">

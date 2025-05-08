@@ -70,6 +70,8 @@ export default {
           violet: "#8B5CF6",
           cyan: "#06B6D4",
           "light-blue": "#3B82F6",
+          red: "#DC2626",
+          black: "#000000",
         },
       },
       borderRadius: {
@@ -114,13 +116,13 @@ export default {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "hero-pattern":
-          "linear-gradient(120deg, #8B5CF6 0%, #4F46E5 50%, #1E3A8A 100%)",
+          "linear-gradient(120deg, #DC2626 0%, #991B1B 50%, #000000 100%)",
         "card-gradient": 
           "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
       },
       boxShadow: {
         glass: "0 4px 30px rgba(0, 0, 0, 0.1)",
-        glow: "0 0 20px rgba(139, 92, 246, 0.5)",
+        glow: "0 0 20px rgba(220, 38, 38, 0.6)",
       },
     },
   },

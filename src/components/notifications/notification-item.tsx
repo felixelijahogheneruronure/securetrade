@@ -52,10 +52,10 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
         <div className={cn(
           "mt-0.5 rounded-full p-1.5",
           notification.type === "general" 
-            ? "bg-blue-100 text-blue-600" 
+            ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" 
             : notification.type === "personal"
-              ? "bg-purple-100 text-purple-600"
-              : "bg-green-100 text-green-600"
+              ? "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+              : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
         )}>
           {getNotificationIcon()}
         </div>
@@ -79,10 +79,10 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
             <span className={cn(
               "text-xs py-0.5 px-2 rounded-full",
               notification.type === "general" 
-                ? "bg-blue-100 text-blue-600" 
+                ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" 
                 : notification.type === "personal"
-                  ? "bg-purple-100 text-purple-600"
-                  : "bg-green-100 text-green-600"
+                  ? "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                  : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
             )}>
               {notification.type === "general" 
                 ? "Announcement" 
@@ -91,7 +91,7 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
                   : "System"}
             </span>
             {!notification.isRead && (
-              <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+              <span className="w-2 h-2 rounded-full bg-red-600"></span>
             )}
           </div>
         </div>

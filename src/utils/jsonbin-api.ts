@@ -5,7 +5,10 @@ export const JSONBIN_CONFIG = {
   MASTER_KEY: '$2a$10$a93Wz14f/5DUCwACUbuF6eLnVRO4UhHPzsOg38B1qo9ikgHYFHRtG',
   ACCESS_KEY: '$2a$10$ZBvH0BxKCETxq1zcx60ufuO/YIMH63mLSnUcAIxa5sp1DZ72ZDnNS',
   
-  // Bin URLs
+  // Master bin containing all data endpoints
+  MASTER_BIN: 'https://api.jsonbin.io/v3/b/681caac78561e97a500ff1b0',
+  
+  // Legacy Bin URLs (kept for backward compatibility)
   BINS: {
     USERS: 'https://api.jsonbin.io/v3/b/6818865b8a456b796697f195',
     WALLETS: 'https://api.jsonbin.io/v3/b/6818867e8561e97a500e1d4d',
@@ -16,6 +19,31 @@ export const JSONBIN_CONFIG = {
     FUNDING_ACCOUNTS: 'https://api.jsonbin.io/v3/b/6818995d8960c979a593bb4c',
     PENDING_FUNDINGS: 'https://api.jsonbin.io/v3/b/681899ca8960c979a593bb83',
     WITHDRAWALS: 'https://api.jsonbin.io/v3/b/68189a228960c979a593bb9a'
+  }
+};
+
+/**
+ * Fetches master bin data from JSONBin
+ * @returns The JSON response containing all data endpoints
+ */
+export const fetchMasterBin = async () => {
+  try {
+    const response = await fetch(JSONBIN_CONFIG.MASTER_BIN, {
+      headers: {
+        'X-Master-Key': JSONBIN_CONFIG.MASTER_KEY,
+        'X-Access-Key': JSONBIN_CONFIG.ACCESS_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch master bin: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching master bin:', error);
+    throw error;
   }
 };
 

@@ -9,7 +9,7 @@ export function Layout() {
   const isHomePage = location.pathname === '/';
   
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
       {isHomePage && <CryptoTicker />}
       <main className="flex-grow">
