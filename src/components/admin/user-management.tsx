@@ -15,15 +15,18 @@ import { Label } from "@/components/ui/label";
 import { Edit, Check, X, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { UserWallet } from "@/contexts/auth-context";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 export function UserManagement() {
-  const { getUsers, updateUserWallets } = useAuth();
+  const { getUsers, updateUserWallets, updateUserTier } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<UserWallet | null>(null);
   const [editedBalance, setEditedBalance] = useState("");
+  const [selectedTier, setSelectedTier] = useState<string>('1');
 
   useEffect(() => {
     fetchUsers();
@@ -45,6 +48,7 @@ export function UserManagement() {
 
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
+    setSelectedTier(user.tier?.toString() || '1');
     setIsDialogOpen(true);
   };
 
@@ -82,9 +86,41 @@ export function UserManagement() {
       );
       setUsers(updatedUsers);
       setSelectedUser({ ...selectedUser, wallets: updatedWallets });
+      toast.success("Wallet balance updated successfully");
     }
     
     setEditingWallet(null);
+  };
+
+  const handleUpdateTier = async () => {
+    if (!selectedUser) return;
+    
+    const tierNumber = parseInt(selectedTier);
+    if (isNaN(tierNumber) || tierNumber < 1 || tierNumber > 12) {
+      toast.error("Invalid tier level");
+      return;
+    }
+    
+    try {
+      const success = await updateUserTier(selectedUser.user_id, tierNumber);
+      
+      if (success) {
+        // Update the local state
+        const updatedUsers = users.map(user => 
+          user.user_id === selectedUser.user_id 
+            ? { ...user, tier: tierNumber } 
+            : user
+        );
+        setUsers(updatedUsers);
+        setSelectedUser({ ...selectedUser, tier: tierNumber });
+        toast.success(`User tier updated to Tier ${tierNumber}`);
+      } else {
+        toast.error("Failed to update user tier");
+      }
+    } catch (error) {
+      console.error("Error updating tier:", error);
+      toast.error("An error occurred while updating user tier");
+    }
   };
 
   const handleCancelEdit = () => {
@@ -113,6 +149,7 @@ export function UserManagement() {
               <TableHead>User</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Tier</TableHead>
               <TableHead>Wallet Balance</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -120,7 +157,7 @@ export function UserManagement() {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   No users found
                 </TableCell>
               </TableRow>
@@ -143,6 +180,11 @@ export function UserManagement() {
                         : "bg-red-500/10 text-red-500"
                     }`}>
                       {user.account_status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      Tier {user.tier || 1}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -174,8 +216,47 @@ export function UserManagement() {
             <DialogTitle>Edit User: {selectedUser?.username || selectedUser?.email}</DialogTitle>
           </DialogHeader>
           
-          <div className="py-4">
-            <h3 className="font-medium mb-2">User Wallets</h3>
+          <div className="py-4 space-y-6">
+            {/* User Tier Section */}
+            <div className="space-y-4">
+              <h3 className="font-medium">Account Tier</h3>
+              
+              <div className="p-4 border rounded-md">
+                <div className="flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="tier-select">Current Tier:</Label>
+                    <div className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      Tier {selectedUser?.tier || 1}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <Select
+                      value={selectedTier}
+                      onValueChange={setSelectedTier}
+                    >
+                      <SelectTrigger id="tier-select" className="w-full">
+                        <SelectValue placeholder="Select Tier" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...Array(12)].map((_, i) => (
+                          <SelectItem key={i + 1} value={(i + 1).toString()}>
+                            Tier {i + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button onClick={handleUpdateTier}>
+                      Update Tier
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* User Wallets Section */}
+            <h3 className="font-medium">User Wallets</h3>
             
             {selectedUser?.wallets?.length > 0 ? (
               <div className="space-y-4">

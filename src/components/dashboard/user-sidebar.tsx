@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { 
   BarChart, 
-  Clock, 
   Home, 
   Settings, 
   Users, 
@@ -47,11 +46,6 @@ const userNavItems = [
     icon: ArrowRight,
   },
   {
-    title: "Transactions",
-    href: "/dashboard/transactions",
-    icon: Clock,
-  },
-  {
     title: "Trading Room",
     href: "/dashboard/trading",
     icon: BarChart,
@@ -71,7 +65,7 @@ const userNavItems = [
 export function UserSidebar() {
   const location = useLocation();
   const { logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Changed to true so it's collapsed by default
   
   return (
     <Collapsible 

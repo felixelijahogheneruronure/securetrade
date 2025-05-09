@@ -11,6 +11,7 @@ import FundAccount from "./FundAccount";
 import WithdrawFunds from "./WithdrawFunds";
 import TransferFunds from "./TransferFunds";
 import UserMessages from "./UserMessages";
+import Settings from "./Settings";
 import { NotificationPanel } from "@/components/user/notification-panel";
 
 const DashboardHome = () => (
@@ -50,6 +51,7 @@ const Dashboard = () => {
               <div className="flex items-center">
                 <span className="mr-2 text-sm font-medium">
                   {user?.username || user?.email}
+                  {user?.tier && <span className="ml-2 text-xs text-muted-foreground">(Tier {user.tier})</span>}
                 </span>
                 <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-red-600 to-black">
                   <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
@@ -69,7 +71,7 @@ const Dashboard = () => {
           <Route path="/withdraw" element={<WithdrawFunds />} />
           <Route path="/transfer" element={<TransferFunds />} />
           <Route path="/messages" element={<UserMessages />} />
-          {/* Add more routes as needed */}
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
     </div>

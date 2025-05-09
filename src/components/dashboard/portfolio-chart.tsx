@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export function PortfolioChart() {
   const marketOverviewRef = useRef<HTMLDivElement>(null);
   const technicalAnalysisRef = useRef<HTMLDivElement>(null);
+  const eventsWidgetRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Don't execute during SSR
-    if (!marketOverviewRef.current || !technicalAnalysisRef.current) return;
+    if (!marketOverviewRef.current || !technicalAnalysisRef.current || !eventsWidgetRef.current) return;
     
     // Create Market Overview Widget
     const marketScript = document.createElement('script');
@@ -93,6 +94,32 @@ export function PortfolioChart() {
       technicalAnalysisRef.current.appendChild(technicalScript);
     }
     
+    // Create Events Widget
+    const eventsScript = document.createElement('script');
+    eventsScript.type = 'text/javascript';
+    eventsScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
+    eventsScript.async = true;
+    
+    // Add Events configuration
+    eventsScript.innerHTML = JSON.stringify({
+      "colorTheme": "dark",
+      "isTransparent": false,
+      "width": "100%",
+      "height": "450",
+      "locale": "en",
+      "importanceFilter": "-1,0,1"
+    });
+    
+    // Clean up existing content and add events widget script
+    if (eventsWidgetRef.current) {
+      // Remove any existing scripts
+      const existingEventsScripts = eventsWidgetRef.current.querySelectorAll('script');
+      existingEventsScripts.forEach(script => script.remove());
+      
+      // Append new script
+      eventsWidgetRef.current.appendChild(eventsScript);
+    }
+    
     // Cleanup on unmount
     return () => {
       if (marketOverviewRef.current && marketScript.parentNode === marketOverviewRef.current) {
@@ -100,6 +127,9 @@ export function PortfolioChart() {
       }
       if (technicalAnalysisRef.current && technicalScript.parentNode === technicalAnalysisRef.current) {
         technicalAnalysisRef.current.removeChild(technicalScript);
+      }
+      if (eventsWidgetRef.current && eventsScript.parentNode === eventsWidgetRef.current) {
+        eventsWidgetRef.current.removeChild(eventsScript);
       }
     };
   }, []);
@@ -127,6 +157,20 @@ export function PortfolioChart() {
         </CardHeader>
         <CardContent>
           <div className="h-[400px] rounded-lg overflow-hidden" ref={technicalAnalysisRef}>
+            <div className="tradingview-widget-container">
+              <div className="tradingview-widget-container__widget"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Economic Events Widget */}
+      <Card className="overflow-hidden rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-xl">Economic Calendar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[450px] rounded-lg overflow-hidden" ref={eventsWidgetRef}>
             <div className="tradingview-widget-container">
               <div className="tradingview-widget-container__widget"></div>
             </div>
