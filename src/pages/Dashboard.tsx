@@ -51,7 +51,7 @@ const Dashboard = () => {
               <div className="flex items-center">
                 <span className="mr-2 text-sm font-medium">
                   {user?.username || user?.email}
-                  {user?.tier && <span className="ml-2 text-xs text-muted-foreground">(Tier {user.tier})</span>}
+                  {user?.tier !== undefined && <span className="ml-2 text-xs text-muted-foreground">(Tier {user.tier})</span>}
                 </span>
                 <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-red-600 to-black">
                   <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">

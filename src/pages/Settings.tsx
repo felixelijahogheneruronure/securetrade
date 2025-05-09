@@ -99,11 +99,11 @@ const Settings = () => {
               <div className="p-4 border rounded-md bg-primary/5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-lg font-medium">
-                    Tier {user?.tier || 1}
+                    Tier {user?.tier !== undefined ? user.tier : 1}
                   </div>
                   
                   <div className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                    {user?.tier > 5 ? 'Premium' : 'Standard'}
+                    {user?.tier && user.tier > 5 ? 'Premium' : 'Standard'}
                   </div>
                 </div>
                 

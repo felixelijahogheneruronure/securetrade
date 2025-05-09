@@ -14,6 +14,7 @@ type User = {
   wallets?: UserWallet[];
   isAdmin?: boolean;
   role?: string;
+  tier?: number; // Added tier property
 };
 
 export type UserWallet = {
@@ -33,6 +34,7 @@ type AuthContextType = {
   logout: () => void;
   updateUserWallets: (userId: string, wallets: UserWallet[]) => Promise<boolean>;
   getUsers: () => Promise<User[]>;
+  updateUserTier: (userId: string, tier: number) => Promise<boolean>; // Added updateUserTier function
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,6 +56,7 @@ const ADMIN_ACCOUNT = {
   account_status: 'active',
   role: 'admin',
   isAdmin: true,
+  tier: 12, // Admin has highest tier
   wallets: [
     { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 10.0, value: 608000, change: 1.8 },
     { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 100.0, value: 206000, change: -0.5 },
@@ -148,6 +151,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Implement the updateUserTier function
+  const updateUserTier = async (userId: string, tier: number): Promise<boolean> => {
+    try {
+      const users = await getUsers();
+      const userIndex = users.findIndex(u => u.user_id === userId);
+      
+      if (userIndex === -1) {
+        toast.error("User not found");
+        return false;
+      }
+      
+      users[userIndex].tier = tier;
+      const success = await updateUsers(users);
+      
+      // If the current user's tier is being updated, update the local state too
+      if (success && user && user.user_id === userId) {
+        const updatedUser = { ...user, tier };
+        setUser(updatedUser);
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(updatedUser));
+        toast.success("User tier updated successfully");
+      }
+      
+      return success;
+    } catch (error) {
+      console.error("Failed to update user tier:", error);
+      toast.error("Failed to update user tier");
+      return false;
+    }
+  };
+
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -167,6 +200,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const userWithWallets = {
           ...userWithoutPassword,
           wallets: user.wallets || DEFAULT_WALLETS,
+          tier: user.tier || 1, // Set default tier to 1 if not present
           isAdmin
         } as User;
         
@@ -214,6 +248,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         password,
         account_status: 'active',
         role: email.includes('admin') ? 'admin' : 'user',
+        tier: 1, // Start at tier 1
         wallets: DEFAULT_WALLETS,
         isAdmin: email.includes('admin')
       };
@@ -265,6 +300,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       register, 
       logout,
       updateUserWallets,
+      updateUserTier, // Added to the context provider
       getUsers
     }}>
       {children}

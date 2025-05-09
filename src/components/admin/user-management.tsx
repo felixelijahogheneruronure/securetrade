@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -48,7 +47,7 @@ export function UserManagement() {
 
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
-    setSelectedTier(user.tier?.toString() || '1');
+    setSelectedTier((user.tier || 1).toString());
     setIsDialogOpen(true);
   };
 
