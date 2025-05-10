@@ -2,7 +2,9 @@
 import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { JSONBIN_CONFIG, fetchFromJsonBin, fetchMasterBin } from '@/utils/jsonbin-api';
@@ -25,39 +27,7 @@ const UserMessages = () => {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const tawkContainerRef = useRef<HTMLDivElement>(null);
-
-  // RGB animation effect for the border
-  const borderStyles = `
-    .rgb-border {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .rgb-border::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      z-index: -1;
-      animation: rotate 4s linear infinite;
-      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-      background-size: 400% 400%;
-      border-radius: 14px;
-    }
-    @keyframes rotate {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-  `;
+  const [activeTab, setActiveTab] = useState('messages');
 
   useEffect(() => {
     if (user) {
@@ -67,7 +37,7 @@ const UserMessages = () => {
 
   // Initialize Tawk.to chat
   useEffect(() => {
-    if (!tawkContainerRef.current) return;
+    if (!tawkContainerRef.current || activeTab !== 'livechat') return;
 
     // Remove any existing scripts first
     const existingScripts = tawkContainerRef.current.querySelectorAll('script');
@@ -78,21 +48,17 @@ const UserMessages = () => {
     });
 
     // Create and add the Tawk script
-    const tawkDiv = document.createElement('div');
-    tawkDiv.id = 'tawk_681ef9bc08bed819150db836';
-    tawkContainerRef.current.appendChild(tawkDiv);
-
     const script = document.createElement('script');
     script.type = 'text/javascript';
+    script.async = true;
     script.innerHTML = `
       var Tawk_API = Tawk_API || {};
       var Tawk_LoadStart = new Date();
-      Tawk_API.embedded = 'tawk_681ef9bc08bed819150db836';
       (function(){
         var s1 = document.createElement("script"),
             s0 = document.getElementsByTagName("script")[0];
         s1.async = true;
-        s1.src = 'https://embed.tawk.to/681ef9bc08bed819150db836/1iqsnccte';
+        s1.src = 'https://embed.tawk.to/681dfb58ff215a190bf9c3f4/default';
         s1.charset = 'UTF-8';
         s1.setAttribute('crossorigin', '*');
         s0.parentNode.insertBefore(s1, s0);
@@ -112,7 +78,7 @@ const UserMessages = () => {
         });
       }
     };
-  }, []);
+  }, [activeTab]);
 
   const fetchUserMessages = async () => {
     setIsLoading(true);
@@ -277,70 +243,49 @@ const UserMessages = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Live Chat & Messages</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Messages</h2>
         <p className="text-muted-foreground">
-          Connect with SECURE TRADE FORGE support team in real-time and view your message history
+          View your messages and announcements from SECURE TRADE FORGE
         </p>
       </div>
-      
-      <style dangerouslySetInnerHTML={{ __html: borderStyles }} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Live Chat Section - Left Column */}
-        <div>
-          <Card className="overflow-hidden h-full">
-            <CardHeader className="bg-red-600/10 dark:bg-red-900/20 pb-4">
-              <CardTitle>Live Support Chat</CardTitle>
-              <CardDescription>
-                Chat directly with our support team in real-time
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="rgb-border m-4">
-                <div 
-                  ref={tawkContainerRef} 
-                  className="h-[500px] bg-card rounded-lg overflow-hidden"
-                >
-                  {/* Tawk.to will be injected here */}
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    Loading chat support...
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Messages Section - Right Column */}
-        <div className="space-y-6">
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-red-600/10 dark:bg-red-900/20 pb-4">
-              <CardTitle>Send a Message</CardTitle>
-              <CardDescription>
-                Contact the SECURE TRADE FORGE team with any questions or concerns
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={sendMessage} className="space-y-4">
-                <Textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message here..."
-                  className="min-h-[100px]"
-                />
-                <Button 
-                  type="submit" 
-                  disabled={sending || !newMessage.trim()} 
-                  className="bg-red-600 hover:bg-red-700 text-white float-right"
-                >
-                  {sending ? 'Sending...' : 'Send Message'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
 
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold">Message History</h3>
+      <Tabs defaultValue="messages" onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="livechat">Live Chat</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="messages">
+          <div className="grid grid-cols-1 gap-6">
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-red-600/10 dark:bg-red-900/20 pb-4">
+                <CardTitle>Send a Message</CardTitle>
+                <CardDescription>
+                  Contact the SECURE TRADE FORGE team with any questions or concerns
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <form onSubmit={sendMessage} className="space-y-4">
+                  <Textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    className="min-h-[100px]"
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={sending || !newMessage.trim()} 
+                    className="bg-red-600 hover:bg-red-700 text-white float-right"
+                  >
+                    {sending ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-between items-center mt-8 mb-4">
+            <h3 className="text-2xl font-bold">Message History</h3>
             <Button onClick={fetchUserMessages} disabled={isLoading} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500/10">
               Refresh
             </Button>
@@ -360,7 +305,7 @@ const UserMessages = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+            <div className="space-y-4">
               {messages.map((message) => (
                 <Card 
                   key={message.id} 
@@ -396,8 +341,28 @@ const UserMessages = () => {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="livechat">
+          <Card>
+            <CardHeader>
+              <CardTitle>Live Chat Support</CardTitle>
+              <CardDescription>Chat directly with our support team in real-time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div 
+                ref={tawkContainerRef} 
+                className="h-[600px] bg-card rounded-lg border border-border"
+              >
+                {/* Tawk.to will be injected here */}
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Loading chat support...
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

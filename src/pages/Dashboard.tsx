@@ -5,7 +5,6 @@ import { ActivityOverview } from "@/components/dashboard/activity-overview";
 import { PortfolioChart } from "@/components/dashboard/portfolio-chart";
 import { UserSidebar } from "@/components/dashboard/user-sidebar";
 import { useAuth } from "@/contexts/auth-context";
-import { useState } from "react";
 import WalletsPage from "./WalletsPage";
 import TradingRoom from "./TradingRoom";
 import FundAccount from "./FundAccount";
@@ -40,36 +39,13 @@ const DashboardHome = () => (
 
 const Dashboard = () => {
   const { user } = useAuth();
-  // Set sidebar closed by default
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-background">
-      <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0 sm:w-16'} overflow-hidden`}>
-        <UserSidebar />
-      </div>
+      <UserSidebar />
       <div className="flex-1 overflow-y-auto">
         <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="flex h-14 items-center px-4">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="mr-4 p-2 rounded-md hover:bg-accent"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {sidebarOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                  </>
-                )}
-              </svg>
-            </button>
             <div className="ml-auto flex items-center space-x-4">
               <NotificationPanel />
               <div className="flex items-center">
