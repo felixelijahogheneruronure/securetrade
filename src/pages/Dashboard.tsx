@@ -46,7 +46,7 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-background">
       <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0 sm:w-16'} overflow-hidden`}>
-        <UserSidebar collapsed={!sidebarOpen} setCollapsed={(state) => setSidebarOpen(!state)} />
+        <UserSidebar />
       </div>
       <div className="flex-1 overflow-y-auto">
         <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
