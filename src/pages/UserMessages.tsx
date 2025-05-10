@@ -1,10 +1,7 @@
-
 import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { JSONBIN_CONFIG, fetchFromJsonBin, fetchMasterBin } from '@/utils/jsonbin-api';
@@ -26,51 +23,67 @@ const UserMessages = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const tawkContainerRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState('messages');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [rgbBorderColor, setRgbBorderColor] = useState('rgb(239, 68, 68)'); // Initial red color
+
+  // RGB animation effect
+  useEffect(() => {
+    const colors = [
+      'rgb(239, 68, 68)',   // Red
+      'rgb(16, 185, 129)',  // Green
+      'rgb(59, 130, 246)'   // Blue
+    ];
+    let colorIndex = 0;
+
+    const intervalId = setInterval(() => {
+      colorIndex = (colorIndex + 1) % colors.length;
+      setRgbBorderColor(colors[colorIndex]);
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     if (user) {
       fetchUserMessages();
     }
-  }, [user]);
 
-  // Initialize Tawk.to chat
-  useEffect(() => {
-    if (!tawkContainerRef.current || activeTab !== 'livechat') return;
+    // Initialize Tawk.to chat
+    if (chatContainerRef.current) {
+      // Remove any existing scripts first
+      const existingScripts = chatContainerRef.current.querySelectorAll('script');
+      existingScripts.forEach(script => {
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      });
 
-    // Remove any existing scripts first
-    const existingScripts = tawkContainerRef.current.querySelectorAll('script');
-    existingScripts.forEach(script => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    });
-
-    // Create and add the Tawk script
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.innerHTML = `
-      var Tawk_API = Tawk_API || {};
-      var Tawk_LoadStart = new Date();
-      (function(){
-        var s1 = document.createElement("script"),
-            s0 = document.getElementsByTagName("script")[0];
-        s1.async = true;
-        s1.src = 'https://embed.tawk.to/681dfb58ff215a190bf9c3f4/default';
-        s1.charset = 'UTF-8';
-        s1.setAttribute('crossorigin', '*');
-        s0.parentNode.insertBefore(s1, s0);
-      })();
-    `;
-    
-    tawkContainerRef.current.appendChild(script);
+      // Create and add the Tawk script
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = true;
+      script.innerHTML = `
+        var Tawk_API = Tawk_API || {};
+        var Tawk_LoadStart = new Date();
+        Tawk_API.embedded='tawk_681ef9bc08bed819150db836';
+        (function(){
+          var s1 = document.createElement("script"),
+              s0 = document.getElementsByTagName("script")[0];
+          s1.async = true;
+          s1.src = 'https://embed.tawk.to/681ef9bc08bed819150db836/1iqsnccte';
+          s1.charset = 'UTF-8';
+          s1.setAttribute('crossorigin', '*');
+          s0.parentNode.insertBefore(s1, s0);
+        })();
+      `;
+      
+      chatContainerRef.current.appendChild(script);
+    }
     
     return () => {
       // Clean up - remove script when component unmounts
-      if (tawkContainerRef.current) {
-        const scripts = tawkContainerRef.current.querySelectorAll('script');
+      if (chatContainerRef.current) {
+        const scripts = chatContainerRef.current.querySelectorAll('script');
         scripts.forEach(script => {
           if (script.parentNode) {
             script.parentNode.removeChild(script);
@@ -78,7 +91,7 @@ const UserMessages = () => {
         });
       }
     };
-  }, [activeTab]);
+  }, [user]);
 
   const fetchUserMessages = async () => {
     setIsLoading(true);
@@ -245,124 +258,125 @@ const UserMessages = () => {
       <div className="mb-8">
         <h2 className="text-3xl font-bold tracking-tight">Messages</h2>
         <p className="text-muted-foreground">
-          View your messages and announcements from SECURE TRADE FORGE
+          Chat with the SECURE TRADE FORGE team
         </p>
       </div>
 
-      <Tabs defaultValue="messages" onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="livechat">Live Chat</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="messages">
-          <div className="grid grid-cols-1 gap-6">
-            <Card className="overflow-hidden">
-              <CardHeader className="bg-red-600/10 dark:bg-red-900/20 pb-4">
-                <CardTitle>Send a Message</CardTitle>
-                <CardDescription>
-                  Contact the SECURE TRADE FORGE team with any questions or concerns
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <form onSubmit={sendMessage} className="space-y-4">
-                  <Textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message here..."
-                    className="min-h-[100px]"
-                  />
-                  <Button 
-                    type="submit" 
-                    disabled={sending || !newMessage.trim()} 
-                    className="bg-red-600 hover:bg-red-700 text-white float-right"
-                  >
-                    {sending ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="flex justify-between items-center mt-8 mb-4">
-            <h3 className="text-2xl font-bold">Message History</h3>
-            <Button onClick={fetchUserMessages} disabled={isLoading} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500/10">
-              Refresh
-            </Button>
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center p-12">
-              <div className="animate-spin h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full"></div>
-            </div>
-          ) : messages.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p>You don't have any messages yet.</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Messages from the SECURE TRADE FORGE team will appear here.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <Card 
-                  key={message.id} 
-                  className={cn(
-                    message.read ? "border-border" : "border-red-500",
-                    message.sender === user?.user_id ? "bg-red-50/10" : "bg-card"
-                  )}
-                >
-                  <CardHeader className="pb-2 flex flex-row justify-between items-start">
-                    <div>
-                      <CardTitle className="flex items-center text-lg">
-                        {message.sender === user?.user_id 
-                          ? "You" 
-                          : message.sender === "admin" 
-                            ? "SECURE TRADE FORGE Team" 
-                            : message.senderName || message.sender}
-                        {!message.read && message.recipient === user?.user_id && (
-                          <span className="ml-2 h-2 w-2 rounded-full bg-red-600"></span>
-                        )}
-                      </CardTitle>
-                      <CardDescription>{formatDate(message.timestamp)}</CardDescription>
-                    </div>
-                    {message.recipient === 'all' && (
-                      <div className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                        Announcement
-                      </div>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="livechat">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Chat Support</CardTitle>
-              <CardDescription>Chat directly with our support team in real-time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div 
-                ref={tawkContainerRef} 
-                className="h-[600px] bg-card rounded-lg border border-border"
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <Card 
+          className="overflow-hidden" 
+          style={{
+            borderWidth: '3px',
+            borderStyle: 'solid',
+            borderColor: rgbBorderColor,
+            transition: 'border-color 0.5s ease-in-out'
+          }}
+        >
+          <CardHeader className="bg-red-600/10 dark:bg-red-900/20 pb-4">
+            <CardTitle>Contact Support</CardTitle>
+            <CardDescription>
+              Send a message to our team or use the live chat below
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <form onSubmit={sendMessage} className="space-y-4 mb-6">
+              <Textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message here..."
+                className="min-h-[100px]"
+              />
+              <Button 
+                type="submit" 
+                disabled={sending || !newMessage.trim()} 
+                className="bg-red-600 hover:bg-red-700 text-white float-right"
               >
-                {/* Tawk.to will be injected here */}
+                {sending ? 'Sending...' : 'Send Message'}
+              </Button>
+            </form>
+            <div className="clear-both"></div>
+            
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4">Live Chat</h3>
+              <div 
+                id="tawk_681ef9bc08bed819150db836"
+                ref={chatContainerRef} 
+                className="bg-card rounded-lg border border-border h-[400px]"
+                style={{
+                  minHeight: '400px'
+                }}
+              >
                 <div className="flex items-center justify-center h-full text-muted-foreground">
                   Loading chat support...
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex justify-between items-center mt-8 mb-4">
+        <h3 className="text-2xl font-bold">Message History</h3>
+        <Button 
+          onClick={fetchUserMessages} 
+          disabled={isLoading} 
+          variant="outline" 
+          className="border-red-500 text-red-500 hover:bg-red-500/10"
+        >
+          Refresh
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-12">
+          <div className="animate-spin h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full"></div>
+        </div>
+      ) : messages.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p>You don't have any messages yet.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Messages from the SECURE TRADE FORGE team will appear here.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <Card 
+              key={message.id} 
+              className={cn(
+                message.read ? "border-border" : "border-red-500",
+                message.sender === user?.user_id ? "bg-red-50/10" : "bg-card"
+              )}
+            >
+              <CardHeader className="pb-2 flex flex-row justify-between items-start">
+                <div>
+                  <CardTitle className="flex items-center text-lg">
+                    {message.sender === user?.user_id 
+                      ? "You" 
+                      : message.sender === "admin" 
+                        ? "SECURE TRADE FORGE Team" 
+                        : message.senderName || message.sender}
+                    {!message.read && message.recipient === user?.user_id && (
+                      <span className="ml-2 h-2 w-2 rounded-full bg-red-600"></span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>{formatDate(message.timestamp)}</CardDescription>
+                </div>
+                {message.recipient === 'all' && (
+                  <div className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                    Announcement
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
