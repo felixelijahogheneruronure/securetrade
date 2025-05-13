@@ -12,13 +12,22 @@ const UserMessages = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 mb-6">
-        <AnimatedBorderCard 
-          title="Contact Support" 
-          description="Get in touch with our support team via live chat"
-        >
-          <SecureChat />
-        </AnimatedBorderCard>
+      {/* Boot sequence container */}
+      <div className="boot-sequence" id="bootScreen">
+        <div className="vfx-text">SECURE TRADE FORGE</div>
+        <div className="loading-ring"></div>
+      </div>
+
+      {/* Chat container */}
+      <div id="chat">
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          <AnimatedBorderCard 
+            title="Contact Support" 
+            description="Get in touch with our support team via live chat"
+          >
+            <SecureChat />
+          </AnimatedBorderCard>
+        </div>
       </div>
     </div>
   );
