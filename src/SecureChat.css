@@ -135,3 +135,102 @@ body {
 .show-chat {
   opacity: 1 !important;
 }
+
+/* Boot sequence styles */
+.boot-sequence {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000; /* Background color */
+  color: #fff; /* Text color */
+  z-index: 9999;
+  text-align: center;
+}
+
+.vfx-text {
+  font-size: 36px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+.loading-ring {
+  margin-top: 20px;
+  border: 4px solid transparent;
+  border-top: 4px solid #fff; /* Loading ring color */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Chat container styles */
+#chat {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 9998;
+}
+
+/* Show chat container after boot sequence is done */
+.show-chat {
+  display: block;
+}
+
+/* Add transition for smooth visibility toggle */
+#chat {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Optional: Customize chat appearance */
+.chat-header {
+  padding: 10px;
+  background-color: #007bff; /* Change to your preferred color */
+  color: #fff;
+  text-align: center;
+}
+
+.chat-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100% - 50px); /* Adjust based on your chat header height */
+}
+
+/* Optional: Add additional chat bubble styles */
+.chat-bubble {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  max-width: 80%;
+}
