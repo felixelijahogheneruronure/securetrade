@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { TawkChatContainer } from '@/components/messages/TawkChatContainer';
+import SecureChat from '@/components/messages/SecureChat'; // Make sure this path is correct
 import { AnimatedBorderCard } from '@/components/messages/AnimatedBorderCard';
 
 const UserMessages = () => {
@@ -18,7 +17,7 @@ const UserMessages = () => {
           title="Contact Support" 
           description="Get in touch with our support team via live chat"
         >
-          <TawkChatContainer />
+          <SecureChat />
         </AnimatedBorderCard>
       </div>
     </div>
