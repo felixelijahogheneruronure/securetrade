@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import '/import './SecureChat.css';'; // We will move styles here
+import './SecureChat.css'; // We will move styles here
 
 const SecureChat = () => {
   useEffect(() => {
