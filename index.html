@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -29,74 +28,89 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/nguoianphu/jnotification-jquery-plugin@main/jquery-notification.min.js"></script>
     <script>
-      $(document).ready(function () {
-        const randomPosition = () => {
-          const positions = [
-            { top: '10%', left: '10px' },
-            { top: '30%', left: '10px' },
-            { top: '10%', right: '10px' },
-            { bottom: '10%', left: '10px' },
-            { bottom: '30%', right: '10px' },
-            { top: '20%', right: '10px' },
-            { bottom: '20%', left: '10px' },
-            { top: '50%', left: '50%' }, // center-ish
-          ];
-          return positions[Math.floor(Math.random() * positions.length)];
-        };
+  $(document).ready(function () {
+    const getRandomPosition = () => {
+      const positions = [
+        { top: '10%', left: '10px' },
+        { top: '30%', left: '10px' },
+        { top: '10%', right: '10px' },
+        { bottom: '10%', left: '10px' },
+        { bottom: '30%', right: '10px' },
+        { top: '20%', right: '10px' },
+        { bottom: '20%', left: '10px' },
+        { top: '50%', left: '50%' } // center-ish
+      ];
+      return positions[Math.floor(Math.random() * positions.length)];
+    };
 
-        function showNotification() {
-          const pos = randomPosition();
+    function showNotification() {
+      const pos = getRandomPosition();
 
-          $('#notification-1').Notification({
-            Varible1: [
-              "Dirk", "Johnny", "Watkin", "Alejandro", "Vina", "Tony", "Ahmed", "Jackson", "Noah", "Aiden", "Darren", "Isabella", "Aria", "John", "Greyson", 
-              "Peter", "Mohammed", "William", "Lucas", "Amelia", "Mason", "Mathew", "Richard", "Chris", "Mia", "Oliver",
-              "João", "Mateus", "Gabriel", "Rafael", "Thiago", "Enzo", "Caio", "Bruno", "Leonardo", "Gustavo", "Felipe", 
-              "André", "Daniel", "Vinícius", "Henrique", "Sofia", "Beatriz", "Júlia", "Larissa", "Camila", "Mariana", "Isadora", 
-              "Ana Clara", "Rafaela", "Bianca", "Letícia", "Vitória", "Manuela", "Fernanda", "Eduardo", "Carla", "Luiz", "Clara", "Giovana"
-            ],
-            Varible2: [
-              "USA", "UAE", "ITALY", "FLORIDA", "MEXICO", "INDIA", "CHINA", "CAMBODIA", "UNITED KINGDOM", "GERMANY",
-              "AUSTRALIA", "BANGLADESH", "SWEDEN", "PAKISTAN", "MALDIVES", "SEYCHELLES", "BOLIVIA", "SOUTH AFRICA",
-              "AFGHANISTAN", "ALBANIA", "ALGERIA", "ANDORRA", "ZAMBIA", "ZIMBABWE", "LEBANON", "SAUDI ARABIA", "CHILE", 
-              "PUERTO RICO", "NIGERIA", "GHANA", "KENYA", "BRAZIL", "ARGENTINA", "SPAIN", "FRANCE", "THAILAND", "VIETNAM", 
-              "TURKEY", "SINGAPORE", "NEPAL", "UGANDA", "MOROCCO", "PHILIPPINES", "ROMANIA", "POLAND", "CUBA", "COLOMBIA"
-            ],
-            Amount: [1000, 2500, 5550, 6660, 4454, 3833, 6969, 3200, 4750, 1020],
-            Content: '[Varible1] from [Varible2] just earned <b>$[Amount]</b>!',
-            Show: ['stable', 7, 12],
-            Close: 6,
-            Time: [0, 23],
-            LocationTop: [!!pos.top, pos.top || ''],
-            LocationBottom: [!!pos.bottom, pos.bottom || ''],
-            LocationRight: [!!pos.right, pos.right || ''],
-            LocationLeft: [!!pos.left, pos.left || ''],
-            Background: '#000000',
-            BorderRadius: 8,
-            BorderWidth: 1,
-            BorderColor: '#ffc552',
-            TextColor: 'white',
-            IconColor: '#ffffff',
-            AnimationEffectOpen: 'fadeInUp',
-            AnimationEffectClose: 'fadeOutDown',
-            Number: 1, // One at a time since it's randomized
-            Link: [false, 'https://dynamictrade.live', '_blank']
-          });
-        }
-
-        // Loop to show notifications continuously
-        let total = 80; // Total notifications to show
-        let counter = 0;
-        function loopNotifications() {
-          if (counter >= total) return;
-          showNotification();
-          counter++;
-          const nextDelay = Math.floor(Math.random() * (12000 - 7000 + 1)) + 7000;
-          setTimeout(loopNotifications, nextDelay);
-        }
-
-        loopNotifications();
+      $('#notification-1').Notification({
+        Variable1: [
+          "Dirk", "Johnny", "Watkin", "Alejandro", "Vina", "Tony", "Ahmed", "Jackson", "Noah", "Aiden", "Darren", "Isabella", "Aria", "John", "Greyson",
+          "Peter", "Mohammed", "William", "Lucas", "Amelia", "Mason", "Mathew", "Richard", "Chris", "Mia", "Oliver",
+          "João", "Mateus", "Gabriel", "Rafael", "Thiago", "Enzo", "Caio", "Bruno", "Leonardo", "Gustavo", "Felipe",
+          "André", "Daniel", "Vinícius", "Henrique", "Sofia", "Beatriz", "Júlia", "Larissa", "Camila", "Mariana", "Isadora",
+          "Ana Clara", "Rafaela", "Bianca", "Letícia", "Vitória", "Manuela", "Fernanda", "Eduardo", "Carla", "Luiz", "Clara", "Giovana"
+        ],
+        Variable2: [
+          "USA", "UAE", "ITALY", "FLORIDA", "MEXICO", "INDIA", "CHINA", "CAMBODIA", "UNITED KINGDOM", "GERMANY",
+          "AUSTRALIA", "BANGLADESH", "SWEDEN", "PAKISTAN", "MALDIVES", "SEYCHELLES", "BOLIVIA", "SOUTH AFRICA",
+          "AFGHANISTAN", "ALBANIA", "ALGERIA", "ANDORRA", "ZAMBIA", "ZIMBABWE", "LEBANON", "SAUDI ARABIA", "CHILE",
+          "PUERTO RICO", "NIGERIA", "GHANA", "KENYA", "BRAZIL", "ARGENTINA", "SPAIN", "FRANCE", "THAILAND", "VIETNAM",
+          "TURKEY", "SINGAPORE", "NEPAL", "UGANDA", "MOROCCO", "PHILIPPINES", "ROMANIA", "POLAND", "CUBA", "COLOMBIA"
+        ],
+        Amount: [1000, 2500, 5550, 6660, 4454, 3833, 6969, 3200, 4750, 1020],
+        Content: '[Variable1] from [Variable2] just earned <b>$[Amount]</b>!',
+        Show: ['stable', 7, 12],
+        Close: 6,
+        Time: [0, 23],
+        LocationTop: [!!pos.top, pos.top || ''],
+        LocationBottom: [!!pos.bottom, pos.bottom || ''],
+        LocationRight: [!!pos.right, pos.right || ''],
+        LocationLeft: [!!pos.left, pos.left || ''],
+        Background: '#000000',
+        BorderRadius: 8,
+        BorderWidth: 1,
+        BorderColor: '#ffc552',
+        TextColor: 'white',
+        IconColor: '#ffffff',
+        AnimationEffectOpen: 'fadeInUp',
+        AnimationEffectClose: 'fadeOutDown',
+        Number: 1,
+        Link: [false, 'https://dynamictrade.live', '_blank']
       });
-    </script>
+    }
+
+    let notificationCount = 0;
+    const totalNotifications = 80;
+
+    function loopNotifications() {
+      if (notificationCount >= totalNotifications) return;
+      showNotification();
+      notificationCount++;
+
+      const delay = Math.floor(Math.random() * (12000 - 7000 + 1)) + 7000;
+      setTimeout(loopNotifications, delay);
+    }
+
+    loopNotifications();
+  });
+</script>
+  <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+  var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+  (function () {
+    var s1 = document.createElement("script"),
+      s0 = document.getElementsByTagName("script")[0];
+    s1.async = true;
+    s1.src = "https://embed.tawk.to/681f2e4a9c7ecf190fb1bc2f/default";
+    s1.charset = "UTF-8";
+    s1.setAttribute("crossorigin", "*");
+    s0.parentNode.insertBefore(s1, s0);
+  })();
+</script>
+<!--End of Tawk.to Script-->
   </body>
 </html>
