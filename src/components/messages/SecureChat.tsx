@@ -1,6 +1,13 @@
 
 import React, { useEffect } from 'react';
 
+// Extend Window interface to include Tawk_API
+declare global {
+  interface Window {
+    Tawk_API?: any;
+  }
+}
+
 const SecureChat = () => {
   useEffect(() => {
     const bootTimeout = setTimeout(() => {
@@ -33,7 +40,7 @@ const SecureChat = () => {
 
       script.onload = function () {
         const adjustIframe = () => {
-          const iframe = document.querySelector("iframe[title='chat widget']");
+          const iframe = document.querySelector("iframe[title='chat widget']") as HTMLIFrameElement;
           if (iframe) {
             iframe.style.width = '100%';
             iframe.style.height = '100%';
