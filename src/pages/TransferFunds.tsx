@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { JSONBIN_CONFIG, createJsonBinData } from '@/utils/jsonbin-api';
-import { UserWallet } from '@/utils/baserow-api';
+import { UserWallet } from '@/contexts/auth-context';
 
 const TransferFunds = () => {
   const { user, updateUserWallets } = useAuth();
@@ -56,7 +56,7 @@ const TransferFunds = () => {
 
     try {
       const transferRequest = {
-        senderId: user.id,
+        senderId: user.user_id,
         recipientId: recipientId,
         walletId: selectedWallet,
         amount: selectedAmount,

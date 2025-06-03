@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,6 @@ const WalletsPage = () => {
     toast.info("External wallet connections will be available soon!");
   };
 
-  // Calculate total balance from Baserow wallet data (wallet.value is now a number)
-  const totalBalance = wallets.reduce((acc, wallet) => {
-    return acc + wallet.value;
-  }, 0);
-
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -44,7 +40,7 @@ const WalletsPage = () => {
           <CardHeader className="pb-2">
             <CardDescription>Total Balance (USD)</CardDescription>
             <CardTitle className="text-3xl font-bold">
-              ${totalBalance.toLocaleString('en-US', {
+              ${wallets.reduce((acc, wallet) => acc + wallet.value, 0).toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -98,8 +94,8 @@ const WalletsPage = () => {
             </CardContent>
           </Card>
         ) : (
-          wallets.map((wallet, index) => (
-            <Card key={index} className="hover:border-primary/50 transition-colors cursor-pointer">
+          wallets.map((wallet) => (
+            <Card key={wallet.id} className="hover:border-primary/50 transition-colors cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
@@ -114,12 +110,14 @@ const WalletsPage = () => {
                   <div className="text-right">
                     <div className="font-medium">{wallet.balance} {wallet.symbol}</div>
                     <div className="flex items-center justify-end">
-                      <span className="font-medium">${wallet.value.toFixed(2)}</span>
-                      <span className={`ml-2 text-xs ${
-                        wallet.change.includes('+') ? 'text-green-500' : 
-                        wallet.change.includes('-') ? 'text-red-500' : 'text-muted-foreground'
-                      }`}>
-                        {wallet.change}
+                      <span className="font-medium">
+                        ${wallet.value.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                      <span className={`ml-2 text-xs ${wallet.change > 0 ? 'text-green-500' : wallet.change < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                        {wallet.change > 0 ? '+' : ''}{wallet.change}%
                       </span>
                     </div>
                   </div>

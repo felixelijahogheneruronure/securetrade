@@ -2,15 +2,29 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { 
-  fetchUsers, 
-  authenticateUser, 
-  createUser, 
-  updateUserWallets as baserowUpdateUserWallets,
-  updateUserTier as baserowUpdateUserTier,
-  User,
-  UserWallet
-} from "@/utils/baserow-api";
+import { JSONBIN_CONFIG, fetchFromJsonBin, updateJsonBin } from "@/utils/jsonbin-api";
+
+// Define user type
+type User = {
+  user_id: string;
+  email: string;
+  username?: string;
+  auth_provider: string;
+  account_status: string;
+  wallets?: UserWallet[];
+  isAdmin?: boolean;
+  role?: string;
+  tier?: number; // Added tier property
+};
+
+export type UserWallet = {
+  id: string;
+  name: string;
+  symbol: string;
+  balance: number;
+  value: number;
+  change: number;
+};
 
 type AuthContextType = {
   user: User | null;
@@ -20,15 +34,34 @@ type AuthContextType = {
   logout: () => void;
   updateUserWallets: (userId: string, wallets: UserWallet[]) => Promise<boolean>;
   getUsers: () => Promise<User[]>;
-  updateUserTier: (userId: string, tier: number) => Promise<boolean>;
+  updateUserTier: (userId: string, tier: number) => Promise<boolean>; // Added updateUserTier function
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Sample wallet data for new users
+const DEFAULT_WALLETS = [
+  { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
+  { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 2.0, value: 4120.75, change: -0.5 },
+  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 100, value: 100, change: 0 }, // Modified to $100 welcome bonus
+];
+
 // Admin account details
-const ADMIN_CREDENTIALS = {
+const ADMIN_ACCOUNT = {
+  user_id: 'admin_001',
   email: 'admin@admin.com',
-  password: 'admin'
+  username: 'Admin',
+  auth_provider: 'local',
+  password: 'admin',
+  account_status: 'active',
+  role: 'admin',
+  isAdmin: true,
+  tier: 12, // Admin has highest tier
+  wallets: [
+    { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 10.0, value: 608000, change: 1.8 },
+    { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 100.0, value: 206000, change: -0.5 },
+    { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 500000, value: 500000, change: 0 },
+  ]
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -49,46 +82,61 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setIsLoading(false);
 
-    // Ensure admin account exists
+    // Check if admin account exists, if not create it
     ensureAdminAccount();
   }, []);
 
-  // Ensure admin account exists in Baserow
+  // Ensure admin account exists
   const ensureAdminAccount = async () => {
     try {
-      const users = await fetchUsers();
-      const adminExists = users.some(user => user.email === ADMIN_CREDENTIALS.email);
+      const users = await getUsers();
+      const adminExists = users.some(user => user.email === ADMIN_ACCOUNT.email);
       
       if (!adminExists) {
-        console.log("Creating admin account in Baserow");
-        await createUser({
-          username: 'Admin',
-          email: ADMIN_CREDENTIALS.email,
-          password: ADMIN_CREDENTIALS.password,
-          role: 'Admin',
-          tier: '12'
-        });
+        console.log("Creating admin account");
+        users.push(ADMIN_ACCOUNT);
+        await updateUsers(users);
       }
     } catch (error) {
       console.error("Failed to check/create admin account:", error);
     }
   };
 
-  const getUsers = async () => {
+  async function getUsers() {
     try {
-      return await fetchUsers();
+      const res = await fetchFromJsonBin(JSONBIN_CONFIG.BINS.USERS);
+      return res.record || [];
     } catch (error) {
       console.error("Failed to fetch users:", error);
       return [];
     }
-  };
+  }
+
+  async function updateUsers(users: User[]) {
+    try {
+      await updateJsonBin(JSONBIN_CONFIG.BINS.USERS, users);
+      return true;
+    } catch (error) {
+      console.error("Failed to update users:", error);
+      return false;
+    }
+  }
 
   const updateUserWallets = async (userId: string, wallets: UserWallet[]): Promise<boolean> => {
     try {
-      const success = await baserowUpdateUserWallets(userId, wallets);
+      const users = await getUsers();
+      const userIndex = users.findIndex(u => u.user_id === userId);
+      
+      if (userIndex === -1) {
+        toast.error("User not found");
+        return false;
+      }
+      
+      users[userIndex].wallets = wallets;
+      const success = await updateUsers(users);
       
       // If the current user's wallets are being updated, update the local state too
-      if (success && user && user.id === userId) {
+      if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, wallets };
         setUser(updatedUser);
         localStorage.setItem("secure_trade_forge_user", JSON.stringify(updatedUser));
@@ -103,12 +151,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Implement the updateUserTier function
   const updateUserTier = async (userId: string, tier: number): Promise<boolean> => {
     try {
-      const success = await baserowUpdateUserTier(userId, tier);
+      const users = await getUsers();
+      const userIndex = users.findIndex(u => u.user_id === userId);
+      
+      if (userIndex === -1) {
+        toast.error("User not found");
+        return false;
+      }
+      
+      users[userIndex].tier = tier;
+      const success = await updateUsers(users);
       
       // If the current user's tier is being updated, update the local state too
-      if (success && user && user.id === userId) {
+      if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, tier };
         setUser(updatedUser);
         localStorage.setItem("secure_trade_forge_user", JSON.stringify(updatedUser));
@@ -126,16 +184,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const authenticatedUser = await authenticateUser(email, password);
+      const users = await getUsers();
+      const user = users.find((u: User & { password: string }) => 
+        u.email === email && u.password === password
+      );
 
-      if (authenticatedUser) {
-        setUser(authenticatedUser);
-        localStorage.setItem("secure_trade_forge_user", JSON.stringify(authenticatedUser));
+      if (user) {
+        // Determine if user is admin
+        const isAdmin = user.role === 'admin' || user.isAdmin || email === ADMIN_ACCOUNT.email;
         
-        toast.success(`Welcome back, ${authenticatedUser.username}!`);
+        // Remove password before storing in state
+        const { password: _, ...userWithoutPassword } = user;
+        
+        // Make sure the user has wallets
+        const userWithWallets = {
+          ...userWithoutPassword,
+          wallets: user.wallets || DEFAULT_WALLETS,
+          tier: user.tier || 1, // Set default tier to 1 if not present
+          isAdmin
+        } as User;
+        
+        setUser(userWithWallets);
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(userWithWallets));
+        
+        toast.success(`Welcome back, ${user.username || user.email}!`);
         
         // Determine where to redirect based on user type
-        if (authenticatedUser.isAdmin) {
+        if (isAdmin) {
           navigate("/admin");
         } else {
           navigate("/dashboard");
@@ -157,35 +232,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (email: string, username: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      
-      // Check if user already exists
-      const users = await fetchUsers();
+      const users = await getUsers();
+
       if (users.find((u: User) => u.email === email)) {
         toast.error("User already exists!");
         return false;
       }
 
-      // Create new user with welcome bonus
-      const newUser = await createUser({
+      // Create new user with default wallets and $100 welcome bonus in USDC
+      const newUser = {
+        user_id: 'user_' + Math.floor(Math.random() * 999999),
         email,
         username,
+        auth_provider: 'local',
         password,
-        role: email.includes('admin') ? 'Admin' : 'User',
-        tier: '1'
-      });
+        account_status: 'active',
+        role: email.includes('admin') ? 'admin' : 'user',
+        tier: 1, // Start at tier 1
+        wallets: DEFAULT_WALLETS,
+        isAdmin: email.includes('admin')
+      };
 
-      // Show welcome message with bonus notification
-      toast.success(`Welcome ${username}! You have received a welcome bonus of $100. Kindly top up your account to start earning.`);
-      
-      setUser(newUser);
-      localStorage.setItem("secure_trade_forge_user", JSON.stringify(newUser));
-      
-      if (newUser.isAdmin) {
-        navigate("/admin");
+      users.push(newUser);
+      const success = await updateUsers(users);
+
+      if (success) {
+        // Remove password before storing in state
+        const { password: _, ...userWithoutPassword } = newUser;
+        
+        // Show welcome message with bonus notification
+        toast.success(`Welcome ${username}! You have just received a welcome bonus of $100. Kindly top up your account to start earning.`);
+        
+        setUser(userWithoutPassword as User);
+        localStorage.setItem("secure_trade_forge_user", JSON.stringify(userWithoutPassword));
+        
+        if (userWithoutPassword.isAdmin || userWithoutPassword.role === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
+        return true;
       } else {
-        navigate("/dashboard");
+        toast.error("Registration failed. Please try again.");
+        return false;
       }
-      return true;
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Registration failed. Please try again.");
@@ -210,7 +300,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       register, 
       logout,
       updateUserWallets,
-      updateUserTier,
+      updateUserTier, // Added to the context provider
       getUsers
     }}>
       {children}
@@ -225,5 +315,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-export type { UserWallet };

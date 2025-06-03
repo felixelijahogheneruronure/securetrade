@@ -44,7 +44,7 @@ export function NotificationPanel() {
         // Filter notifications for this user (general + personal for this user)
         const userNotifications = notificationsData.filter((notif: Notification) => 
           notif.type === "general" || 
-          (notif.type === "personal" && notif.recipientId === user.id) ||
+          (notif.type === "personal" && notif.recipientId === user.user_id) ||
           notif.type === "system"
         );
         
@@ -65,7 +65,7 @@ export function NotificationPanel() {
             timestamp: new Date().toISOString(),
             isRead: false,
             type: "personal",
-            recipientId: user.id
+            recipientId: user.user_id
           },
           {
             id: "notif_2",
@@ -92,7 +92,7 @@ export function NotificationPanel() {
           timestamp: new Date().toISOString(),
           isRead: false,
           type: "personal",
-          recipientId: user.id
+          recipientId: user.user_id
         }
       ];
       setNotifications(fallbackNotifications);
@@ -151,7 +151,7 @@ export function NotificationPanel() {
       const unread = updatedNotifications.filter((n: Notification) => 
         !n.isRead && 
         (n.type === "general" || 
-         (n.type === "personal" && n.recipientId === user?.id) ||
+         (n.type === "personal" && n.recipientId === user?.user_id) ||
          n.type === "system")
       ).length;
       
