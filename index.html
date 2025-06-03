@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -26,9 +27,14 @@
     <!-- Notification popup script -->
     <div id="notification-1"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/nguoianphu/jnotification-jquery-plugin@main/jquery-notification.min.js"></script>
     <script>
   $(document).ready(function () {
+    // Check if notification plugin is available
+    if (typeof $.fn.Notification === 'undefined') {
+      console.log('Notification plugin not available, skipping notifications');
+      return;
+    }
+
     const getRandomPosition = () => {
       const positions = [
         { top: '10%', left: '10px' },
@@ -38,49 +44,53 @@
         { bottom: '30%', right: '10px' },
         { top: '20%', right: '10px' },
         { bottom: '20%', left: '10px' },
-        { top: '50%', left: '50%' } // center-ish
+        { top: '50%', left: '50%' }
       ];
       return positions[Math.floor(Math.random() * positions.length)];
     };
 
     function showNotification() {
-      const pos = getRandomPosition();
+      try {
+        const pos = getRandomPosition();
 
-      $('#notification-1').Notification({
-        Variable1: [
-          "Dirk", "Johnny", "Watkin", "Alejandro", "Vina", "Tony", "Ahmed", "Jackson", "Noah", "Aiden", "Darren", "Isabella", "Aria", "John", "Greyson",
-          "Peter", "Mohammed", "William", "Lucas", "Amelia", "Mason", "Mathew", "Richard", "Chris", "Mia", "Oliver",
-          "João", "Mateus", "Gabriel", "Rafael", "Thiago", "Enzo", "Caio", "Bruno", "Leonardo", "Gustavo", "Felipe",
-          "André", "Daniel", "Vinícius", "Henrique", "Sofia", "Beatriz", "Júlia", "Larissa", "Camila", "Mariana", "Isadora",
-          "Ana Clara", "Rafaela", "Bianca", "Letícia", "Vitória", "Manuela", "Fernanda", "Eduardo", "Carla", "Luiz", "Clara", "Giovana"
-        ],
-        Variable2: [
-          "USA", "UAE", "ITALY", "FLORIDA", "MEXICO", "INDIA", "CHINA", "CAMBODIA", "UNITED KINGDOM", "GERMANY",
-          "AUSTRALIA", "BANGLADESH", "SWEDEN", "PAKISTAN", "MALDIVES", "SEYCHELLES", "BOLIVIA", "SOUTH AFRICA",
-          "AFGHANISTAN", "ALBANIA", "ALGERIA", "ANDORRA", "ZAMBIA", "ZIMBABWE", "LEBANON", "SAUDI ARABIA", "CHILE",
-          "PUERTO RICO", "NIGERIA", "GHANA", "KENYA", "BRAZIL", "ARGENTINA", "SPAIN", "FRANCE", "THAILAND", "VIETNAM",
-          "TURKEY", "SINGAPORE", "NEPAL", "UGANDA", "MOROCCO", "PHILIPPINES", "ROMANIA", "POLAND", "CUBA", "COLOMBIA"
-        ],
-        Amount: [1000, 2500, 5550, 6660, 4454, 3833, 6969, 3200, 4750, 1020],
-        Content: '[Variable1] from [Variable2] just earned <b>$[Amount]</b>!',
-        Show: ['stable', 7, 12],
-        Close: 6,
-        Time: [0, 23],
-        LocationTop: [!!pos.top, pos.top || ''],
-        LocationBottom: [!!pos.bottom, pos.bottom || ''],
-        LocationRight: [!!pos.right, pos.right || ''],
-        LocationLeft: [!!pos.left, pos.left || ''],
-        Background: '#000000',
-        BorderRadius: 8,
-        BorderWidth: 1,
-        BorderColor: '#ffc552',
-        TextColor: 'white',
-        IconColor: '#ffffff',
-        AnimationEffectOpen: 'fadeInUp',
-        AnimationEffectClose: 'fadeOutDown',
-        Number: 1,
-        Link: [false, 'https://dynamictrade.live', '_blank']
-      });
+        $('#notification-1').Notification({
+          Variable1: [
+            "Dirk", "Johnny", "Watkin", "Alejandro", "Vina", "Tony", "Ahmed", "Jackson", "Noah", "Aiden", "Darren", "Isabella", "Aria", "John", "Greyson",
+            "Peter", "Mohammed", "William", "Lucas", "Amelia", "Mason", "Mathew", "Richard", "Chris", "Mia", "Oliver",
+            "João", "Mateus", "Gabriel", "Rafael", "Thiago", "Enzo", "Caio", "Bruno", "Leonardo", "Gustavo", "Felipe",
+            "André", "Daniel", "Vinícius", "Henrique", "Sofia", "Beatriz", "Júlia", "Larissa", "Camila", "Mariana", "Isadora",
+            "Ana Clara", "Rafaela", "Bianca", "Letícia", "Vitória", "Manuela", "Fernanda", "Eduardo", "Carla", "Luiz", "Clara", "Giovana"
+          ],
+          Variable2: [
+            "USA", "UAE", "ITALY", "FLORIDA", "MEXICO", "INDIA", "CHINA", "CAMBODIA", "UNITED KINGDOM", "GERMANY",
+            "AUSTRALIA", "BANGLADESH", "SWEDEN", "PAKISTAN", "MALDIVES", "SEYCHELLES", "BOLIVIA", "SOUTH AFRICA",
+            "AFGHANISTAN", "ALBANIA", "ALGERIA", "ANDORRA", "ZAMBIA", "ZIMBABWE", "LEBANON", "SAUDI ARABIA", "CHILE",
+            "PUERTO RICO", "NIGERIA", "GHANA", "KENYA", "BRAZIL", "ARGENTINA", "SPAIN", "FRANCE", "THAILAND", "VIETNAM",
+            "TURKEY", "SINGAPORE", "NEPAL", "UGANDA", "MOROCCO", "PHILIPPINES", "ROMANIA", "POLAND", "CUBA", "COLOMBIA"
+          ],
+          Amount: [1000, 2500, 5550, 6660, 4454, 3833, 6969, 3200, 4750, 1020],
+          Content: '[Variable1] from [Variable2] just earned <b>$[Amount]</b>!',
+          Show: ['stable', 7, 12],
+          Close: 6,
+          Time: [0, 23],
+          LocationTop: [!!pos.top, pos.top || ''],
+          LocationBottom: [!!pos.bottom, pos.bottom || ''],
+          LocationRight: [!!pos.right, pos.right || ''],
+          LocationLeft: [!!pos.left, pos.left || ''],
+          Background: '#000000',
+          BorderRadius: 8,
+          BorderWidth: 1,
+          BorderColor: '#ffc552',
+          TextColor: 'white',
+          IconColor: '#ffffff',
+          AnimationEffectOpen: 'fadeInUp',
+          AnimationEffectClose: 'fadeOutDown',
+          Number: 1,
+          Link: [false, 'https://dynamictrade.live', '_blank']
+        });
+      } catch (error) {
+        console.log('Notification error:', error);
+      }
     }
 
     let notificationCount = 0;
@@ -95,10 +105,13 @@
       setTimeout(loopNotifications, delay);
     }
 
-    loopNotifications();
+    // Only start notifications if plugin is available
+    if (typeof $.fn.Notification !== 'undefined') {
+      loopNotifications();
+    }
   });
 </script>
-  <!--Start of Tawk.to Script-->
+    <!--Start of Tawk.to Script-->
 <script type="text/javascript">
   var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
   (function () {
