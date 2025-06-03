@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,10 +25,9 @@ const WalletsPage = () => {
     toast.info("External wallet connections will be available soon!");
   };
 
-  // Calculate total balance from Baserow wallet data
+  // Calculate total balance from Baserow wallet data (wallet.value is now a number)
   const totalBalance = wallets.reduce((acc, wallet) => {
-    const value = parseFloat(wallet.value.replace(/[$,]/g, '')) || 0;
-    return acc + value;
+    return acc + wallet.value;
   }, 0);
 
   return (
@@ -116,7 +114,7 @@ const WalletsPage = () => {
                   <div className="text-right">
                     <div className="font-medium">{wallet.balance} {wallet.symbol}</div>
                     <div className="flex items-center justify-end">
-                      <span className="font-medium">{wallet.value}</span>
+                      <span className="font-medium">${wallet.value.toFixed(2)}</span>
                       <span className={`ml-2 text-xs ${
                         wallet.change.includes('+') ? 'text-green-500' : 
                         wallet.change.includes('-') ? 'text-red-500' : 'text-muted-foreground'
