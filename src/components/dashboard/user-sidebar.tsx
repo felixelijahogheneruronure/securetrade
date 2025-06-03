@@ -12,7 +12,8 @@ import {
   ArrowUp,
   ArrowRight,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
@@ -56,6 +57,11 @@ const userNavItems = [
     icon: Users,
   },
   {
+    title: "Become Our Agent",
+    href: "/dashboard/become-agent",
+    icon: UserPlus,
+  },
+  {
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
@@ -65,7 +71,7 @@ const userNavItems = [
 export function UserSidebar() {
   const location = useLocation();
   const { logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(true); // Changed to true so it's collapsed by default
+  const [collapsed, setCollapsed] = useState(true);
   
   return (
     <Collapsible 

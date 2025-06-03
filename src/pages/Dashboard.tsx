@@ -12,6 +12,7 @@ import WithdrawFunds from "./WithdrawFunds";
 import TransferFunds from "./TransferFunds";
 import UserMessages from "./UserMessages";
 import Settings from "./Settings";
+import BecomeAgent from "./BecomeAgent";
 import { NotificationPanel } from "@/components/user/notification-panel";
 
 const DashboardHome = () => (
@@ -71,6 +72,7 @@ const Dashboard = () => {
           <Route path="/withdraw" element={<WithdrawFunds />} />
           <Route path="/transfer" element={<TransferFunds />} />
           <Route path="/messages" element={<UserMessages />} />
+          <Route path="/become-agent" element={<BecomeAgent />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
