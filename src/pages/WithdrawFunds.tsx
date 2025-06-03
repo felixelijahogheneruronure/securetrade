@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { JSONBIN_CONFIG, createJsonBinData } from '@/utils/jsonbin-api';
-import { UserWallet } from '@/contexts/auth-context';
+import { UserWallet } from '@/utils/baserow-api';
 
 const withdrawMethods = [
   { id: 'bank', name: 'Bank Transfer', icon: '🏦' },
@@ -63,7 +63,7 @@ const WithdrawFunds = () => {
 
     try {
       const withdrawalRequest = {
-        userId: user.user_id,
+        userId: user.id,
         walletId: selectedWallet,
         method: withdrawMethod,
         amount: selectedAmount,

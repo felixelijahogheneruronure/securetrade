@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Edit, Check, X, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { UserWallet } from "@/contexts/auth-context";
+import { UserWallet } from "@/utils/baserow-api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
@@ -67,19 +68,19 @@ export function UserManagement() {
       wallet.id === editingWallet.id 
         ? { 
             ...wallet, 
-            balance: newBalance,
+            balance: newBalance.toString(),
             // Update the value based on the new balance
-            value: wallet.symbol === 'USDC' ? newBalance : newBalance * (wallet.value / editingWallet.balance)
+            value: wallet.symbol === 'USD' ? newBalance : newBalance * (editingWallet.value / parseFloat(editingWallet.balance))
           } 
         : wallet
     );
     
-    const success = await updateUserWallets(selectedUser.user_id, updatedWallets);
+    const success = await updateUserWallets(selectedUser.id, updatedWallets);
     
     if (success) {
       // Update the local state
       const updatedUsers = users.map(user => 
-        user.user_id === selectedUser.user_id 
+        user.id === selectedUser.id 
           ? { ...user, wallets: updatedWallets } 
           : user
       );
@@ -101,12 +102,12 @@ export function UserManagement() {
     }
     
     try {
-      const success = await updateUserTier(selectedUser.user_id, tierNumber);
+      const success = await updateUserTier(selectedUser.id, tierNumber);
       
       if (success) {
         // Update the local state
         const updatedUsers = users.map(user => 
-          user.user_id === selectedUser.user_id 
+          user.id === selectedUser.id 
             ? { ...user, tier: tierNumber } 
             : user
         );
@@ -162,7 +163,7 @@ export function UserManagement() {
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.user_id}>
+                <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center">
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">

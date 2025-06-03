@@ -19,10 +19,11 @@ export type BaserowUser = {
 };
 
 export type UserWallet = {
+  id: string;
   name: string;
   symbol: string;
   balance: string;
-  value: string;
+  value: number;
   change: string;
 };
 
@@ -39,10 +40,11 @@ export type User = {
 
 // Default welcome bonus wallet
 export const WELCOME_BONUS_WALLET: UserWallet = {
+  id: "welcome_bonus",
   name: "Welcome Bonus",
   symbol: "USD",
   balance: "100.00",
-  value: "$100.00",
+  value: 100.00,
   change: "0%"
 };
 
@@ -76,7 +78,15 @@ const transformBaserowUser = (baserowUser: BaserowUser): User => {
   
   try {
     if (baserowUser.wallets) {
-      wallets = JSON.parse(baserowUser.wallets);
+      const parsedWallets = JSON.parse(baserowUser.wallets);
+      wallets = parsedWallets.map((wallet: any, index: number) => ({
+        id: wallet.id || `wallet_${index}`,
+        name: wallet.name,
+        symbol: wallet.symbol,
+        balance: wallet.balance,
+        value: typeof wallet.value === 'string' ? parseFloat(wallet.value.replace(/[$,]/g, '')) || 0 : wallet.value,
+        change: wallet.change
+      }));
     }
   } catch (error) {
     console.error('Error parsing wallets JSON:', error);

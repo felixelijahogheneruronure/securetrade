@@ -59,7 +59,7 @@ const FundAccount = () => {
 
     try {
       const fundingRequest = {
-        userId: user.user_id,
+        userId: user.id,
         method: selectedMethod,
         amount: parseFloat(amount),
         proofUrl: proofFile ? proofFile.name : 'No proof provided',
