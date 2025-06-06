@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ type User = {
   wallets?: UserWallet[];
   isAdmin?: boolean;
   role?: string;
-  tier?: number; // Added tier property
+  tier?: number;
 };
 
 export type UserWallet = {
@@ -34,16 +33,16 @@ type AuthContextType = {
   logout: () => void;
   updateUserWallets: (userId: string, wallets: UserWallet[]) => Promise<boolean>;
   getUsers: () => Promise<User[]>;
-  updateUserTier: (userId: string, tier: number) => Promise<boolean>; // Added updateUserTier function
+  updateUserTier: (userId: string, tier: number) => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Sample wallet data for new users
+// Default wallet setup for new users - $100 USD bonus, other cryptos at zero
 const DEFAULT_WALLETS = [
-  { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 0.25, value: 15230.50, change: 1.8 },
-  { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 2.0, value: 4120.75, change: -0.5 },
-  { id: "3", name: 'USD Coin', symbol: 'USDC', balance: 100, value: 100, change: 0 }, // Modified to $100 welcome bonus
+  { id: "1", name: 'USD Coin', symbol: 'USDC', balance: 100, value: 100, change: 0 }, // $100 Welcome Bonus
+  { id: "2", name: 'Bitcoin', symbol: 'BTC', balance: 0, value: 0, change: 0 }, // Zero balance
+  { id: "3", name: 'Ethereum', symbol: 'ETH', balance: 0, value: 0, change: 0 }, // Zero balance
 ];
 
 // Admin account details
@@ -56,7 +55,7 @@ const ADMIN_ACCOUNT = {
   account_status: 'active',
   role: 'admin',
   isAdmin: true,
-  tier: 12, // Admin has highest tier
+  tier: 12,
   wallets: [
     { id: "1", name: 'Bitcoin', symbol: 'BTC', balance: 10.0, value: 608000, change: 1.8 },
     { id: "2", name: 'Ethereum', symbol: 'ETH', balance: 100.0, value: 206000, change: -0.5 },
@@ -135,7 +134,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       users[userIndex].wallets = wallets;
       const success = await updateUsers(users);
       
-      // If the current user's wallets are being updated, update the local state too
       if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, wallets };
         setUser(updatedUser);
@@ -151,7 +149,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Implement the updateUserTier function
   const updateUserTier = async (userId: string, tier: number): Promise<boolean> => {
     try {
       const users = await getUsers();
@@ -165,7 +162,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       users[userIndex].tier = tier;
       const success = await updateUsers(users);
       
-      // If the current user's tier is being updated, update the local state too
       if (success && user && user.user_id === userId) {
         const updatedUser = { ...user, tier };
         setUser(updatedUser);
@@ -190,17 +186,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
 
       if (user) {
-        // Determine if user is admin
         const isAdmin = user.role === 'admin' || user.isAdmin || email === ADMIN_ACCOUNT.email;
         
-        // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = user;
         
-        // Make sure the user has wallets
         const userWithWallets = {
           ...userWithoutPassword,
           wallets: user.wallets || DEFAULT_WALLETS,
-          tier: user.tier || 1, // Set default tier to 1 if not present
+          tier: user.tier || 1,
           isAdmin
         } as User;
         
@@ -209,7 +202,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         toast.success(`Welcome back, ${user.username || user.email}!`);
         
-        // Determine where to redirect based on user type
         if (isAdmin) {
           navigate("/admin");
         } else {
@@ -239,7 +231,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
 
-      // Create new user with default wallets and $100 welcome bonus in USDC
+      // Create new user with $100 USD bonus and zero crypto balances
       const newUser = {
         user_id: 'user_' + Math.floor(Math.random() * 999999),
         email,
@@ -248,8 +240,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         password,
         account_status: 'active',
         role: email.includes('admin') ? 'admin' : 'user',
-        tier: 1, // Start at tier 1
-        wallets: DEFAULT_WALLETS,
+        tier: 1,
+        wallets: DEFAULT_WALLETS, // $100 USD, 0 BTC, 0 ETH
         isAdmin: email.includes('admin')
       };
 
@@ -257,11 +249,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const success = await updateUsers(users);
 
       if (success) {
-        // Remove password before storing in state
         const { password: _, ...userWithoutPassword } = newUser;
         
-        // Show welcome message with bonus notification
-        toast.success(`Welcome ${username}! You have just received a welcome bonus of $100. Kindly top up your account to start earning.`);
+        toast.success(`Welcome ${username}! You have received a $100 USD welcome bonus. Start trading now!`);
         
         setUser(userWithoutPassword as User);
         localStorage.setItem("secure_trade_forge_user", JSON.stringify(userWithoutPassword));
@@ -300,7 +290,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       register, 
       logout,
       updateUserWallets,
-      updateUserTier, // Added to the context provider
+      updateUserTier,
       getUsers
     }}>
       {children}
